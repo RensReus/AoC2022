@@ -4,17 +4,17 @@ namespace AoC2022.Days02;
 
 class Day : BaseDay
 {
-    static IEnumerable<IEnumerable<string>> ProcessInput(bool part2, string suffix = "")
+    static IEnumerable<IEnumerable<string>> ProcessInput(string filename = "")
     {
-        var readFile = ReadFile("02/" + suffix);
+        var readFile = ReadFileLines("02/" + filename);
         return readFile.Select(line => line.Split(" "));
     }
 
-    public override int Part1(string suffix)
-         => ProcessInput(false, suffix).Sum(x => RoundScore1(x.ElementAt(0), x.ElementAt(1)));
+    public override int Part1(string filename)
+         => ProcessInput(filename).Sum(x => RoundScore1(x.ElementAt(0), x.ElementAt(1)));
 
-    public override int Part2(string suffix)
-         => ProcessInput(false, suffix).Sum(x => RoundScore2(x.ElementAt(0), x.ElementAt(1)));
+    public override int Part2(string filename)
+         => ProcessInput(filename).Sum(x => RoundScore2(x.ElementAt(0), x.ElementAt(1)));
 
 
     private int RoundScore1(string opponent, string you)

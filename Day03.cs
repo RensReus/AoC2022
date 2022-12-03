@@ -4,19 +4,19 @@ namespace AoC2022.Days03;
 
 class Day : BaseDay
 {
-    static List<string> ProcessInput(bool part2, string suffix)
-        => ReadFile("03/" + suffix).ToList();
+    static List<string> ProcessInput(string filename)
+        => ReadFileLines("03/" + filename);
 
-    public override int Part1(string suffix)
-        => ProcessInput(false, suffix)
+    public override int Part1(string filename)
+        => ProcessInput(filename)
             .Select(line => line.Substring(0, line.Length / 2)
                 .Intersect(line.Substring(line.Length / 2))
                 .First())
                 .Sum(x => x.PriorityValue());
 
-    public override int Part2(string suffix)
+    public override int Part2(string filename)
     {
-        var input = ProcessInput(true, suffix);
+        var input = ProcessInput(filename);
         var answer = 0;
         for (int i = 0; i < input.Count; i += 3)
         {
