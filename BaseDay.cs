@@ -2,8 +2,8 @@ namespace AoC2022.Days;
 
 public abstract class BaseDay
 {
-    public static List<string> ReadFileLines(string filename)
-        => File.ReadAllLines(Path.Combine(Directory.GetCurrentDirectory(), $"Inputs/{filename}.txt")).ToList();
+    public static List<string> ReadFile(string filename, string separator = "\r\n")
+        => File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), $"Inputs/{filename}.txt")).Trim().Split(separator).ToList();
 
     public virtual List<Case> Part1Cases() => new();
     public virtual List<Case> Part2Cases() => new();

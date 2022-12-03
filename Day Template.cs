@@ -5,7 +5,7 @@ namespace AoC2022.DaysXX;
 class Day : BaseDay
 {
     static IList<String> ProcessInput(string filename)
-        => ReadFileLines("XX/" + filename);
+        => ReadFile("XX/" + filename);
 
     public override int Part1(string filename)
     {

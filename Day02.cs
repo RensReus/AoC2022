@@ -6,7 +6,7 @@ class Day : BaseDay
 {
     static IEnumerable<IEnumerable<string>> ProcessInput(string filename = "")
     {
-        var readFile = ReadFileLines("02/" + filename);
+        var readFile = ReadFile("02/" + filename);
         return readFile.Select(line => line.Split(" "));
     }
 
