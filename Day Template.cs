@@ -4,13 +4,13 @@ namespace AoC2022.DaysXX;
 
 class Day : BaseDay
 {
-    static IEnumerable<String> ProcessInput(bool part2, string suffix = "")
+    static IEnumerable<String> ProcessInput(bool part2, string suffix)
     {
         var readFile = ReadFile("XX/" + suffix);
         return readFile.Select(line => line);
     }
 
-    public override int Part1(string suffix = "")
+    public override int Part1(string suffix)
     {
         var input = ProcessInput(false, suffix);
 
@@ -18,7 +18,7 @@ class Day : BaseDay
         return answer;
     }
 
-    public override int Part2(string suffix = "")
+    public override int Part2(string suffix)
     {
         var input = ProcessInput(true, suffix);
 
