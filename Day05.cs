@@ -33,11 +33,9 @@ class Day : BaseDay
         var moves = input.Item2;
         foreach (var move in moves)
         {
-            for (int i = 0; i < move.Amount; i++)
-            {
-                stacks[move.Destination].Add(stacks[move.Source].Last());
-                stacks[move.Source].RemoveAt(stacks[move.Source].Count() - 1);
-            }
+            var start = stacks[move.Source].Count() - move.Amount;
+            stacks[move.Destination].AddRange(stacks[move.Source].Skip(start).Reverse());
+            stacks[move.Source].RemoveRange(start, move.Amount);
         }
         Console.WriteLine(new string(stacks.Select(x => x.Last()).ToArray()));
         int answer = 0;
@@ -51,17 +49,9 @@ class Day : BaseDay
         var moves = input.Item2;
         foreach (var move in moves)
         {
-            var temp = new List<char>();
-            for (int i = 0; i < move.Amount; i++)
-            {
-                temp.Add(stacks[move.Source].Last());
-                stacks[move.Source].RemoveAt(stacks[move.Source].Count() - 1);
-            }
-            temp.Reverse();
-            foreach (var item in temp)
-            {
-                stacks[move.Destination].Add(item);
-            }
+            var start = stacks[move.Source].Count() - move.Amount;
+            stacks[move.Destination].AddRange(stacks[move.Source].Skip(start));
+            stacks[move.Source].RemoveRange(start, move.Amount);
         }
         Console.WriteLine(new string(stacks.Select(x => x.Last()).ToArray()));
         int answer = 0;
