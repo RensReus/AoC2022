@@ -2,11 +2,8 @@ namespace AoC2022.Days;
 
 public abstract class BaseDay
 {
-    public static List<string> ReadFile(string filename, string separator = "\r\n") // TODO change to trim end
-        => File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), $"Inputs/{filename}.txt")).Trim().Split(separator).ToList();
-
-    public static List<string> ReadFileNoTrim(string filename, string separator = "\r\n")
-        => File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), $"Inputs/{filename}.txt")).Split(separator).ToList();
+    public static List<string> ReadFile(string filename, string separator = "\r\n")
+        => File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), $"Inputs/{filename}.txt")).TrimEnd().Split(separator).ToList();
 
     public virtual List<Case> Part1Cases() => new();
     public virtual List<Case> Part2Cases() => new();

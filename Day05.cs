@@ -7,7 +7,7 @@ class Day : BaseDay
 {
     static Tuple<List<List<char>>, IEnumerable<Instruction>> ProcessInput(string filename)
     {
-        var a = ReadFileNoTrim("05/" + filename, "\r\n\r\n");
+        var a = ReadFile("05/" + filename, "\r\n\r\n");
         var initialstate = a[0].Split("\r\n");
         var stacks = initialstate.Last().Split("   ").Select(x => new List<char>()).ToList();
         foreach (var line in initialstate.Take(initialstate.Length - 1).Reverse())
