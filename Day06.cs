@@ -10,7 +10,6 @@ class Day : BaseDay
     public override int Part1(string filename)
         => FirstUniqueLetterSegmentEnd(ProcessInput(filename), 4);
 
-
     public override int Part2(string filename)
         => FirstUniqueLetterSegmentEnd(ProcessInput(filename), 14);
 
