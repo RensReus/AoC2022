@@ -1,4 +1,4 @@
-﻿using Day = AoC2022.Days05.Day;
+﻿using Day = AoC2022.Days06.Day;
 namespace AoC2022
 {
     class Program
@@ -7,11 +7,9 @@ namespace AoC2022
         {
             var day = new Day();
 
-            // day.Test1();
-            Console.WriteLine("Part 1: " + day.Part1("1a"));
+            day.Test1();
             Console.WriteLine("Part 1: " + day.Part1("p1"));
-            // day.Test2();
-            Console.WriteLine("Part 2: " + day.Part2("1a"));
+            day.Test2();
             Console.WriteLine("Part 2: " + day.Part2("p1"));
         }
     }
