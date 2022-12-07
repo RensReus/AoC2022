@@ -6,44 +6,32 @@ class Day : BaseDay
 {
     static Dir ProcessInput(string filename)
     {
-        var lines = ReadFile("07/" + filename);
-        Dir currDir = new("default", null);
+        var lines = ReadFile("07/" + filename).Where(x => !x.Contains("$ ls"));
+        Dir currDir = new("placeholder for first instruction", null);
         var topDir = new Dir("/", null);
-        currDir.Children.Add(topDir);
-        var directories = new List<Dir> { topDir };
+        currDir.SubDirectories.Add(topDir);
         foreach (var line in lines)
         {
-            if (line == "$ cd ..")
+            if (line.Contains("$ cd"))
             {
-                currDir = currDir.Parent;
-                continue;
-            }
-            if (line.StartsWith("$ cd"))
-            {
-                currDir = (Dir)currDir.Children.First(x => x.Name == line.Split()[2]);
-                continue;
-            }
-            if (line == "$ ls")
-            {
+                currDir = line.Equals("$ cd ..") ? currDir.Parent : currDir.SubDirectories.First(x => x.Name == line.Split()[2]);
                 continue;
             }
             if (line.StartsWith("dir "))
             {
-                var newdir = new Dir(line.Split()[1], currDir);
-                directories.Add(newdir);
-                currDir.Children.Add(newdir);
+                currDir.SubDirectories.Add(new Dir(line.Split()[1], currDir));
                 continue;
             }
-            currDir.Children.Add(new File(line, currDir));
+            if (!line.StartsWith("$ ls"))
+            {
+                currDir.Files.Add(Int32.Parse(line.Split()[0]));
+            }
         }
         return topDir;
     }
 
     public override int Part1(string filename)
-    {
-        var input = ProcessInput(filename);
-        return input.SumOfSizesAllDirectoriesSmallerThan(100000);
-    }
+        => ProcessInput(filename).SumOfSizesAllDirectoriesSmallerThan(100000);
 
     public override int Part2(string filename)
     {
@@ -58,17 +46,13 @@ class Day : BaseDay
     public override List<Case> Part2Cases() => new() { new("1a", 24933642), new("p1", 8679207) };
 }
 
-public class Entity
+public class Dir
 {
-    public virtual int Size => 0;
-    public string Name;
+    public List<Dir> SubDirectories = new();
+    public List<int> Files = new();
+    public int Size => SubDirectories.Sum(x => x.Size) + Files.Sum();
     public Dir Parent;
-}
-
-public class Dir : Entity
-{
-    public List<Entity> Children = new();
-    public override int Size => Children.Sum(x => x.Size); // TODO store calculated size
+    public string Name;
     public Dir(string name, Dir parent)
     {
         Name = name;
@@ -76,26 +60,13 @@ public class Dir : Entity
     }
 
     internal int SumOfSizesAllDirectoriesSmallerThan(int maxsize)
-        => Children.Where(x => x.GetType() == typeof(Dir)).Sum(x => ((Dir)x).SumOfSizesAllDirectoriesSmallerThan(maxsize))
+        => SubDirectories.Sum(x => x.SumOfSizesAllDirectoriesSmallerThan(maxsize))
             + (Size <= maxsize ? Size : 0);
 
     internal int SmallestSubdirectoryLargerThan(int toFreeUp)
     {
-        var childrenFreeUpSizes = Children.Where(x => x.GetType() == typeof(Dir)).Select(x => ((Dir)x).SmallestSubdirectoryLargerThan(toFreeUp));
-        var smallestValidChild = childrenFreeUpSizes.Count() > 0 ? childrenFreeUpSizes.Min() : int.MaxValue;
+        var smallestValidChild = SubDirectories.Select(x => ((Dir)x).SmallestSubdirectoryLargerThan(toFreeUp)).DefaultIfEmpty(int.MaxValue).Min();
         var thisSize = Size <= toFreeUp ? int.MaxValue : Size;
         return Int32.Min(smallestValidChild, thisSize);
-    }
-}
-
-public class File : Entity
-{
-    public int FileSize;
-    public override int Size => FileSize;
-    public File(string input, Dir parent)
-    {
-        FileSize = Int32.Parse(input.Split()[0]);
-        Name = input.Split()[1];
-        Parent = parent;
     }
 }
