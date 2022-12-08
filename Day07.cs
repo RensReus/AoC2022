@@ -7,22 +7,19 @@ class Day : BaseDay
     static Dir ProcessInput(string filename)
     {
         var lines = ReadFile("07/" + filename).Where(x => !x.Contains("$ ls"));
-        Dir currDir = new("placeholder for first instruction", null);
         var topDir = new Dir("/", null);
-        currDir.SubDirectories.Add(topDir);
-        foreach (var line in lines)
+        var currDir = topDir;
+        foreach (var line in lines.Skip(1))
         {
             if (line.Contains("$ cd"))
             {
                 currDir = line.Equals("$ cd ..") ? currDir.Parent : currDir.SubDirectories.First(x => x.Name == line.Split()[2]);
-                continue;
             }
-            if (line.StartsWith("dir "))
+            else if (line.StartsWith("dir "))
             {
                 currDir.SubDirectories.Add(new Dir(line.Split()[1], currDir));
-                continue;
             }
-            if (!line.StartsWith("$ ls"))
+            else
             {
                 currDir.Files.Add(Int32.Parse(line.Split()[0]));
             }
