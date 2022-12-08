@@ -1,4 +1,4 @@
-﻿using Day = AoC2022.Days07.Day;
+﻿using Day = AoC2022.Days08.Day;
 namespace AoC2022
 {
     class Program
