@@ -75,12 +75,7 @@ internal class Coord
         this.Y = Y;
     }
     public override bool Equals(object other)
-    {
-        Coord c = other as Coord;
-        return c != null &&
-               X == c.X &&
-               Y == c.Y;
-    }
+        => other is Coord c && X == c.X && Y == c.Y;
 
     public override int GetHashCode()
         => HashCode.Combine(X, Y);
