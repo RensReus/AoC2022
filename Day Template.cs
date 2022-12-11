@@ -1,29 +1,25 @@
-using AoC2022.Days;
+namespace AoC2022.DayXX;
 
-namespace AoC2022.DaysXX;
-
-class Day : BaseDay
+class Day011
 {
-    static IList<String> ProcessInput(string filename)
-        => ReadFile("XX/" + filename);
-
-    public override int Part1(string filename)
+    static IList<string> ProcessInput(string input)
     {
-        var input = ProcessInput(filename);
-
-        int answer = 0;
-        return answer;
+        return input.Split(";").ToList();
     }
 
-    public override int Part2(string filename)
+    [Example(expected: 1111111, input: "AAAAA")]
+    [Puzzle(expected: 222222)]
+    public int Part1(string input)
     {
-        var input = ProcessInput(filename);
-
-        int answer = 0;
-        return answer;
+        var processedInput = ProcessInput(input);
+        return 0;
     }
 
-    public override List<Case> Part1Cases() => new() { new("1a", 1111111111) };
-
-    public override List<Case> Part2Cases() => new() { };
+    [Example(expected: 1111111, input: "AAAAA")]
+    [Puzzle(expected: 222222)]
+    public int Part2(string input)
+    {
+        var processedInput = ProcessInput(input);
+        return 0;
+    }
 }
