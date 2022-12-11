@@ -1,14 +1,13 @@
 using System.Text.RegularExpressions;
-using AoC2022.Days;
 
-namespace AoC2022.Days05;
+namespace AoC2022;
 
-class Day : BaseDay
+class Day05
 {
-    static Tuple<List<List<char>>, IEnumerable<Instruction>> ProcessInput(string filename)
+    static (List<List<char>>, IEnumerable<Instruction>) ProcessInput(string input)
     {
-        var a = ReadFile("05/" + filename, "\r\n\r\n");
-        var initialstate = a[0].Split("\r\n");
+        var inputparts = input.Split(";;");
+        var initialstate = inputparts[0].Split(";");
         var stacks = initialstate.Last().Split("   ").Select(x => new List<char>()).ToList();
         foreach (var line in initialstate.Take(initialstate.Length - 1).Reverse())
         {
@@ -22,45 +21,37 @@ class Day : BaseDay
             }
         }
 
-        var moves = a[1].Split("\r\n").Select(line => new Instruction(Regex.Match(line, @"move (\d+) from (\d+) to (\d+)").Groups));
-        return new Tuple<List<List<char>>, IEnumerable<Instruction>>(stacks, moves);
+        var moves = inputparts[1].Split(";").Select(line => new Instruction(Regex.Match(line, @"move (\d+) from (\d+) to (\d+)").Groups));
+        return (stacks, moves);
     }
 
-    public override int Part1(string filename)
+    [Example(expected: "CMZ", input: 1)]
+    [Puzzle(expected: "SVFDLGLWV")]
+    public string Part1(string input)
     {
-        var input = ProcessInput(filename);
-        var stacks = input.Item1;
-        var moves = input.Item2;
+        (var stacks, var moves) = ProcessInput(input);
         foreach (var move in moves)
         {
             var start = stacks[move.Source].Count() - move.Amount;
             stacks[move.Destination].AddRange(stacks[move.Source].Skip(start).Reverse());
             stacks[move.Source].RemoveRange(start, move.Amount);
         }
-        Console.WriteLine(new string(stacks.Select(x => x.Last()).ToArray()));
-        int answer = 0;
-        return answer;
+        return new string(stacks.Select(x => x.Last()).ToArray());
     }
 
-    public override int Part2(string filename)
+    [Example(expected: "MCD", input: 1)]
+    [Puzzle(expected: "DCVTCVPCL")]
+    public string Part2(string input)
     {
-        var input = ProcessInput(filename);
-        var stacks = input.Item1;
-        var moves = input.Item2;
+        (var stacks, var moves) = ProcessInput(input);
         foreach (var move in moves)
         {
             var start = stacks[move.Source].Count() - move.Amount;
             stacks[move.Destination].AddRange(stacks[move.Source].Skip(start));
             stacks[move.Source].RemoveRange(start, move.Amount);
         }
-        Console.WriteLine(new string(stacks.Select(x => x.Last()).ToArray()));
-        int answer = 0;
-        return answer;
+        return new string(stacks.Select(x => x.Last()).ToArray());
     }
-
-    public override List<Case> Part1Cases() => new() { new("1a", 1111111111) };
-
-    public override List<Case> Part2Cases() => new() { };
 }
 
 internal class Instruction

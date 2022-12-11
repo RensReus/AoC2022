@@ -1,23 +1,23 @@
-using AoC2022.Days;
+namespace AoC2022;
 
-namespace AoC2022.Days08;
-
-class Day : BaseDay
+class Day08
 {
-    static IList<String> ProcessInput(string filename)
-        => ReadFile("08/" + filename);
+    static IList<string> ProcessInput(string input)
+        => input.Split(";").ToList();
 
-    public override int Part1(string filename)
+    [Example(expected: 21, input: "30373;25512;65332;33549;35390")]
+    [Puzzle(expected: 1776)]
+    public int Part1(string input)
     {
-        var input = ProcessInput(filename).ToList();
-        var height = input.Count();
-        var width = input[0].Count();
+        var processedInput = ProcessInput(input);
+        var height = processedInput.Count();
+        var width = processedInput[0].Count();
         int answer = height * 2 + width * 2 - 4; // edges minus double counted corners
         for (int row = 1; row < height - 1; row++)
         {
             for (int col = 1; col < width - 1; col++)
             {
-                if (TreeVisible(input, row, col))
+                if (TreeVisible(processedInput, row, col))
                 {
                     answer++;
                 }
@@ -26,15 +26,17 @@ class Day : BaseDay
         return answer;
     }
 
-    public override int Part2(string filename)
+    [Example(expected: 8, input: "30373;25512;65332;33549;35390")]
+    [Puzzle(expected: 234416)]
+    public int Part2(string input)
     {
-        var input = ProcessInput(filename);
+        var processedInput = ProcessInput(input);
         int answer = 0;
-        for (int row = 1; row < input.Count() - 1; row++)
+        for (int row = 1; row < processedInput.Count() - 1; row++)
         {
-            for (int col = 1; col < input[0].Count() - 1; col++)
+            for (int col = 1; col < processedInput[0].Count() - 1; col++)
             {
-                answer = int.Max(answer, ScenicScore(input, row, col));
+                answer = int.Max(answer, ScenicScore(processedInput, row, col));
             }
         }
         return answer;
@@ -66,8 +68,4 @@ class Day : BaseDay
             * (rightposRel == -1 ? rolCount - col - 1 : rightposRel + 1)
             * (bottoposRel == -1 ? rolCount - row - 1 : bottoposRel + 1);
     }
-
-    public override List<Case> Part1Cases() => new() { new("1a", 21), new("p1", 1776) };
-
-    public override List<Case> Part2Cases() => new() { new("1a", 8), new("p1", 234416) };
 }

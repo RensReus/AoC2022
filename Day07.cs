@@ -1,12 +1,10 @@
-using AoC2022.Days;
+namespace AoC2022;
 
-namespace AoC2022.Days07;
-
-class Day : BaseDay
+class Day07
 {
-    static Dir ProcessInput(string filename)
+    static Dir ProcessInput(string input)
     {
-        var lines = ReadFile("07/" + filename).Where(x => !x.Contains("$ ls"));
+        var lines = input.Split(";").ToList().Where(x => !x.Contains("$ ls"));
         var topDir = new Dir("/", null);
         var currDir = topDir;
         foreach (var line in lines.Skip(1))
@@ -27,20 +25,20 @@ class Day : BaseDay
         return topDir;
     }
 
-    public override int Part1(string filename)
-        => ProcessInput(filename).SumOfSizesAllDirectoriesSmallerThan(100000);
+    [Example(expected: 95437, input: 1)]
+    [Puzzle(expected: 1449447)]
+    public int Part1(string input)
+        => ProcessInput(input).SumOfSizesAllDirectoriesSmallerThan(100000);
 
-    public override int Part2(string filename)
+    [Example(expected: 24933642, input: 1)]
+    [Puzzle(expected: 8679207)]
+    public int Part2(string input)
     {
-        var input = ProcessInput(filename);
-        var freeSpace = 70000000 - input.Size;
+        var processedInput = ProcessInput(input);
+        var freeSpace = 70000000 - processedInput.Size;
         var toFreeUp = 30000000 - freeSpace;
-        return input.SmallestSubdirectoryLargerThan(toFreeUp);
+        return processedInput.SmallestSubdirectoryLargerThan(toFreeUp);
     }
-
-    public override List<Case> Part1Cases() => new() { new("1a", 95437), new("p1", 1449447) };
-
-    public override List<Case> Part2Cases() => new() { new("1a", 24933642), new("p1", 8679207) };
 }
 
 public class Dir

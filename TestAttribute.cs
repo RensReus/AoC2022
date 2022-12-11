@@ -38,7 +38,7 @@ public abstract class TestAttribute : Attribute, ITestBuilder, IImplyFixture
             ExpectedResult = Expected,
         };
         var test = new NUnitTestCaseBuilder().BuildTestMethod(method, suite, parameters);
-        test.Name = TestName(method, input);
+        test.Name = TestName(method, input); // TODO beter names
         yield return test;
     }
 

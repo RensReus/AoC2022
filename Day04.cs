@@ -1,22 +1,21 @@
 using System.Text.RegularExpressions;
-using AoC2022.Days;
 
-namespace AoC2022.Days04;
+namespace AoC2022;
 
-class Day : BaseDay
+class Day04
 {
-    static IList<ElfPair> ProcessInput(string filename)
-        => ReadFile("04/" + filename).Select(x => new ElfPair(x)).ToList();
+    static IList<ElfPair> ProcessInput(string input)
+        => input.Split(";").Select(x => new ElfPair(x)).ToList();
 
-    public override int Part1(string filename)
-        => ProcessInput(filename).Select(x => x.HasFullOverlap()).Sum();
+    [Example(expected: 2, input: "2-4,6-8;2-3,4-5;5-7,7-9;2-8,3-7;6-6,4-6;2-6,4-8")]
+    [Puzzle(expected: 471)]
+    public int Part1(string input)
+        => ProcessInput(input).Select(x => x.HasFullOverlap()).Sum();
 
-    public override int Part2(string filename)
-        => ProcessInput(filename).Select(x => x.HasAnyOverlap()).Sum();
-
-    public override List<Case> Part1Cases() => new() { new("1a", 2), new("p1", 471) };
-
-    public override List<Case> Part2Cases() => new() { new("1a", 4), new("p1", 888) };
+    [Example(expected: 4, input: "2-4,6-8;2-3,4-5;5-7,7-9;2-8,3-7;6-6,4-6;2-6,4-8")]
+    [Puzzle(expected: 888)]
+    public int Part2(string input)
+        => ProcessInput(input).Select(x => x.HasAnyOverlap()).Sum();
 }
 
 internal class ElfPair

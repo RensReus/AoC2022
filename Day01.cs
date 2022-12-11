@@ -12,6 +12,6 @@ class Day01
 
     [Example(expected: 45000, input: "1000;2000;3000;;4000;;5000;6000;;7000;8000;9000;;10000")]
     [Puzzle(expected: 209914)]
-    public int Part2(string filename)
-        => ProcessInput(filename).OrderDescending().Take(3).Sum();
+    public int Part2(string input)
+        => ProcessInput(input).OrderDescending().Take(3).Sum();
 }

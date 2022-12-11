@@ -1,17 +1,20 @@
-using AoC2022.Days;
+namespace AoC2022;
 
-namespace AoC2022.Days09;
-
-class Day : BaseDay
+class Day09
 {
-    static IList<String> ProcessInput(string filename)
-        => ReadFile("09/" + filename);
+    static IList<string> ProcessInput(string input)
+        => input.Split(";").ToList();
 
-    public override int Part1(string filename)
-        => UniqueVisitedFieldsCount(ProcessInput(filename), 2);
+    [Example(expected: 13, input: "R 4;U 4;L 3;D 1;R 4;D 1;L 5;R 2")]
+    [Puzzle(expected: 6057)]
+    public int Part1(string input)
+        => UniqueVisitedFieldsCount(ProcessInput(input), 2);
 
-    public override int Part2(string filename)
-        => UniqueVisitedFieldsCount(ProcessInput(filename), 10);
+    [Example(expected: 1, input: "R 4;U 4;L 3;D 1;R 4;D 1;L 5;R 2")]
+    [Example(expected: 36, input: "R 5;U 8;L 8;D 3;R 17;D 10;L 25;U 20")]
+    [Puzzle(expected: 2514)]
+    public int Part2(string input)
+        => UniqueVisitedFieldsCount(ProcessInput(input), 10);
 
     public int UniqueVisitedFieldsCount(IList<string> input, int ropeLength)
     {
@@ -59,10 +62,6 @@ class Day : BaseDay
 
         return new Coord(tailPos.X + Math.Sign(deltaX), tailPos.Y + Math.Sign(deltaY));
     }
-
-    public override List<Case> Part1Cases() => new() { new("1a", 13), new("p1", 6057) };
-
-    public override List<Case> Part2Cases() => new() { new("1a", 1), new("2a", 36), new("p1", 2514) };
 }
 
 internal class Coord

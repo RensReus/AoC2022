@@ -8,8 +8,8 @@ public abstract class BaseDay
     public virtual List<Case> Part1Cases() => new();
     public virtual List<Case> Part2Cases() => new();
 
-    public virtual int Part1(string filename) => 0;
-    public virtual int Part2(string filename) => 0;
+    public virtual int Part1(string input) => 0;
+    public virtual int Part2(string input) => 0;
 
     public record Case(string Input, int Expected);
 
