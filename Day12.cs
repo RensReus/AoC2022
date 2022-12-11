@@ -1,6 +1,6 @@
 namespace AoC2022;
 
-class Day
+class Day12
 {
     static IList<string> ProcessInput(string input)
     {
