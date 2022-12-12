@@ -5,14 +5,14 @@ using NUnit.Framework.Internal.Builders;
 namespace AoC2022;
 
 [AttributeUsage(AttributeTargets.Method)]
-public class PuzzleAttribute : TestAttribute, ITestBuilder, IImplyFixture
+public class PuzzleAttribute : TestAttribute
 {
     public PuzzleAttribute(object expected, bool part2 = false) : base(expected, "Puzzle")
         => Filename = part2 ? "_2" : "";
 }
 
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
-public class ExampleAttribute : TestAttribute, ITestBuilder, IImplyFixture
+public class ExampleAttribute : TestAttribute
 {
     public ExampleAttribute(object expected, string input) : base(expected, "Example")
         => Input = input;
