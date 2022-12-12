@@ -1,16 +1,16 @@
 using System.Data;
-using AoC2022.Days;
+namespace AoC2022;
 
-namespace AoC2022.Days11;
-
-class Day : BaseDay
+class Day11
 {
-    static IList<Monkey> ProcessInput(string filename)
-        => ReadFile("11/" + filename, "\r\n\r\n").Select(x => new Monkey(x)).ToList();
+    static IList<Monkey> ProcessInput(string input)
+        => input.Split(";;").Select(x => new Monkey(x)).ToList();
 
-    public override int Part1(string filename)
+    [Example(expected: 10605, input: 1)]
+    [Puzzle(expected: 66802)]
+    public long Part1(string input)
     {
-        var monkeys = ProcessInput(filename);
+        var monkeys = ProcessInput(input);
         for (int i = 0; i < 20; i++)
         {
             foreach (var monkey in monkeys)
@@ -26,9 +26,11 @@ class Day : BaseDay
         return monkeys[0].EvaluatedItems * monkeys[1].EvaluatedItems;
     }
 
-    public override int Part2(string filename)
+    [Example(expected: 2713310158, input: 1)]
+    [Puzzle(expected: 21800916620)]
+    public long Part2(string input)
     {
-        var monkeys = ProcessInput(filename);
+        var monkeys = ProcessInput(input);
         var extraModulo = 1;
         foreach (var monkey in monkeys)
         {
@@ -46,13 +48,8 @@ class Day : BaseDay
             }
         }
         monkeys = monkeys.OrderByDescending(x => x.EvaluatedItems).ToList();
-        Console.WriteLine(Convert.ToInt64(monkeys[0].EvaluatedItems) * Convert.ToInt64(monkeys[1].EvaluatedItems));
-        return monkeys[0].EvaluatedItems * monkeys[1].EvaluatedItems;
+        return Convert.ToInt64(monkeys[0].EvaluatedItems) * Convert.ToInt64(monkeys[1].EvaluatedItems);
     }
-
-    public override List<Case> Part1Cases() => new() { new("1a", 10605) };
-
-    public override List<Case> Part2Cases() => new() { new("1a", 10605) };
 }
 
 internal class Monkey
@@ -65,7 +62,7 @@ internal class Monkey
     public int EvaluatedItems;
     public Monkey(string x)
     {
-        var lines = x.Split("\r\n");
+        var lines = x.Split(";");
         var items = lines[1].Split(":")[1].Split(",").Select(x => int.Parse(x));
         foreach (var item in items)
         {

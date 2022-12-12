@@ -1,33 +1,31 @@
-using AoC2022.Days;
+namespace AoC2022;
 
-namespace AoC2022.Days03;
-
-class Day : BaseDay
+class Day03
 {
-    static List<string> ProcessInput(string filename)
-        => ReadFile("03/" + filename);
+    static IList<string> ProcessInput(string input)
+        => input.Split(";").ToList();
 
-    public override int Part1(string filename)
-        => ProcessInput(filename)
+    [Example(expected: 157, input: "vJrwpWtwJgWrhcsFMMfFFhFp;jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL;PmmdzqPrVvPwwTWBwg;wMqvLMZHhHMvwLHjbvcjnnSBnvTQFn;ttgJtRGJQctTZtZT;CrZsJsPPZsGzwwsLwLmpwMDw")]
+    [Puzzle(expected: 8298)]
+    public int Part1(string input)
+        => ProcessInput(input)
             .Select(line => line.Substring(0, line.Length / 2)
                 .Intersect(line.Substring(line.Length / 2))
                 .First())
                 .Sum(x => x.PriorityValue());
 
-    public override int Part2(string filename)
+    [Example(expected: 70, input: "vJrwpWtwJgWrhcsFMMfFFhFp;jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL;PmmdzqPrVvPwwTWBwg;wMqvLMZHhHMvwLHjbvcjnnSBnvTQFn;ttgJtRGJQctTZtZT;CrZsJsPPZsGzwwsLwLmpwMDw")]
+    [Puzzle(expected: 2708)]
+    public int Part2(string input)
     {
-        var input = ProcessInput(filename);
+        var processedInput = ProcessInput(input);
         var answer = 0;
-        for (int i = 0; i < input.Count; i += 3)
+        for (int i = 0; i < processedInput.Count; i += 3)
         {
-            answer += input[i].Intersect(input[i + 1]).Intersect(input[i + 2]).First().PriorityValue();
+            answer += processedInput[i].Intersect(processedInput[i + 1]).Intersect(processedInput[i + 2]).First().PriorityValue();
         }
         return answer;
     }
-
-    public override List<Case> Part1Cases() => new() { new("1a", 157), new("p1", 8298) };
-
-    public override List<Case> Part2Cases() => new() { new("1a", 70), new("p1", 2708) };
 }
 
 public static class CharExtensions

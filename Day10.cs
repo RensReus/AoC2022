@@ -1,19 +1,19 @@
-using AoC2022.Days;
+namespace AoC2022;
 
-namespace AoC2022.Days10;
-
-class Day : BaseDay
+class Day10
 {
-    static IList<String> ProcessInput(string filename)
-        => ReadFile("10/" + filename);
+    static IList<string> ProcessInput(string input)
+        => input.Split(";").ToList();
 
-    public override int Part1(string filename)
+    [Example(expected: 13140, input: 1)]
+    [Puzzle(expected: 11780)]
+    public int Part1(string input)
     {
-        var input = ProcessInput(filename);
+        var processedInput = ProcessInput(input);
         var x = 1;
         var cycle = 1;
         int answer = 0;
-        foreach (var line in input)
+        foreach (var line in processedInput)
         {
             var instr = line.Split();
             (answer, cycle) = UpdateAnswerCycle(answer, cycle, x);
@@ -35,41 +35,36 @@ class Day : BaseDay
         return (answer, cycle + 1);
     }
 
-    public override int Part2(string filename)
+    [Example(expected: "██  ██  ██  ██  ██  ██  ██  ██  ██  ██  \n███   ███   ███   ███   ███   ███   ███ \n████    ████    ████    ████    ████    \n█████     █████     █████     █████     \n██████      ██████      ██████      ████\n███████       ███████       ███████     \n", input: 1)]
+    [Puzzle(expected: "███  ████ █  █ █    ███   ██  █  █  ██  \n█  █    █ █  █ █    █  █ █  █ █  █ █  █ \n█  █   █  █  █ █    ███  █  █ █  █ █  █ \n███   █   █  █ █    █  █ ████ █  █ ████ \n█    █    █  █ █    █  █ █  █ █  █ █  █ \n█    ████  ██  ████ ███  █  █  ██  █  █ \n")]
+    public string Part2(string input)
     {
         var x = 1;
-        var input = ProcessInput(filename);
+        var processedInput = ProcessInput(input);
         var cycle = 1;
-        var currline = "";
-        var output = new List<string>();
-        foreach (var line in input)
+        var answer = "";
+        foreach (var line in processedInput)
         {
             var instr = line.Split();
-            (currline, cycle, output) = UpdateLineCycleOutput(currline, cycle, output, x);
+            (cycle, answer) = UpdateLineCycleanswer(cycle, answer, x);
             if (instr[0] == "addx")
             {
-                (currline, cycle, output) = UpdateLineCycleOutput(currline, cycle, output, x);
+                (cycle, answer) = UpdateLineCycleanswer(cycle, answer, x);
                 x += int.Parse(instr[1]);
             }
         }
-
-        return 1;
+        Console.WriteLine(answer);
+        return answer;
     }
 
-    private (string currline, int cycle, List<string> output) UpdateLineCycleOutput(string currline, int cycle, List<string> output, int x)
+    private (int cycle, string answer) UpdateLineCycleanswer(int cycle, string answer, int x)
     {
         var horizontalPos = (cycle - 1) % 40;
-        currline += x >= horizontalPos - 1 && x <= horizontalPos + 1 ? "█" : " ";
+        answer += x >= horizontalPos - 1 && x <= horizontalPos + 1 ? "█" : " ";
         if (cycle % 40 == 0)
         {
-            output.Add(currline);
-            Console.WriteLine(currline);
-            currline = "";
+            answer += "\n";
         }
-        return (currline, cycle + 1, output);
+        return (cycle + 1, answer);
     }
-
-    public override List<Case> Part1Cases() => new() { new("1a", 13140), new("p1", 11780) };
-
-    public override List<Case> Part2Cases() => new() { new("1a", 1) };
 }

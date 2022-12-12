@@ -1,21 +1,19 @@
-using AoC2022.Days;
+namespace AoC2022;
 
-namespace AoC2022.Days02;
-
-class Day : BaseDay
+class Day02
 {
-    static IEnumerable<IEnumerable<string>> ProcessInput(string filename = "")
-    {
-        var readFile = ReadFile("02/" + filename);
-        return readFile.Select(line => line.Split(" "));
-    }
+    static IEnumerable<IEnumerable<string>> ProcessInput(string input)
+        => input.Split(";").Select(line => line.Split(" "));
 
-    public override int Part1(string filename)
-         => ProcessInput(filename).Sum(x => RoundScore1(x.ElementAt(0), x.ElementAt(1)));
+    [Example(expected: 15, input: "A Y;B X;C Z")]
+    [Puzzle(expected: 10718)]
+    public int Part1(string input)
+         => ProcessInput(input).Sum(x => RoundScore1(x.ElementAt(0), x.ElementAt(1)));
 
-    public override int Part2(string filename)
-         => ProcessInput(filename).Sum(x => RoundScore2(x.ElementAt(0), x.ElementAt(1)));
-
+    [Example(expected: 12, input: "A Y;B X;C Z")]
+    [Puzzle(expected: 14652)]
+    public int Part2(string input)
+         => ProcessInput(input).Sum(x => RoundScore2(x.ElementAt(0), x.ElementAt(1)));
 
     private int RoundScore1(string opponent, string you)
     => YourChoiceScore(you)
@@ -35,13 +33,13 @@ class Day : BaseDay
         "Z" => 6,
         _ => throw new ArgumentOutOfRangeException()
     }
-        +
-        (opponent, result) switch
-        {
-            ("A", "Y") or ("B", "X") or ("C", "Z") => YourChoiceScore("X"),
-            ("A", "Z") or ("B", "Y") or ("C", "X") => YourChoiceScore("Y"),
-            _ => YourChoiceScore("Z")
-        };
+    +
+    (opponent, result) switch
+    {
+        ("A", "Y") or ("B", "X") or ("C", "Z") => YourChoiceScore("X"),
+        ("A", "Z") or ("B", "Y") or ("C", "X") => YourChoiceScore("Y"),
+        _ => YourChoiceScore("Z")
+    };
 
     private int YourChoiceScore(string you)
         => you switch
@@ -51,8 +49,4 @@ class Day : BaseDay
             "Z" => 3,
             _ => throw new ArgumentOutOfRangeException()
         };
-
-    public override List<Case> Part1Cases() => new() { new("1a", 15), new("p1", 10718) };
-
-    public override List<Case> Part2Cases() => new() { new("1a", 12), new("p1", 14652) };
 }
