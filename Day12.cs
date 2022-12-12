@@ -3,9 +3,7 @@ namespace AoC2022;
 class Day12
 {
     static IList<string> ProcessInput(string input)
-    {
-        return input.Split(";").ToList();
-    }
+        => input.Split(";").ToList();
 
     [Example(expected: 31, input: "Sabqponm;abcryxxl;accszExk;acctuvwj;abdefghi")]
     [Puzzle(expected: 468)]
@@ -71,9 +69,9 @@ class Day12
     {
         var heightMap = ProcessInput(input);
         var start = GetPoint('S', heightMap);
+        heightMap[start.Row].Replace('S', 'a');
         var end = GetPoint('E', heightMap);
         end.Elevation = 'z';
-        heightMap[start.Row].Replace('S', 'a');
         return RouteLength(heightMap, end, true);
     }
 }
@@ -89,7 +87,7 @@ public class Point
         Col = col;
         Elevation = elevation;
     }
-    public override bool Equals(object other)
+    public override bool Equals(object? other)
         => other is Point c && Row == c.Row && Col == c.Col;
 
     public override int GetHashCode()
@@ -98,21 +96,12 @@ public class Point
     internal IEnumerable<Point> Neighbours(IList<string> heightMap, int height, int width, bool goingDown)
     {
         var neighbours = new List<Point>();
-        if (goingDown)
-        {
-            if (Row - 1 >= 0 && heightMap[Row - 1][Col] - Elevation >= -1) neighbours.Add(new(Row - 1, Col, heightMap[Row - 1][Col]));
-            if (Row + 1 < height && heightMap[Row + 1][Col] - Elevation >= -1) neighbours.Add(new(Row + 1, Col, heightMap[Row + 1][Col]));
-            if (Col - 1 >= 0 && heightMap[Row][Col - 1] - Elevation >= -1) neighbours.Add(new(Row, Col - 1, heightMap[Row][Col - 1]));
-            if (Col + 1 < width && heightMap[Row][Col + 1] - Elevation >= -1) neighbours.Add(new(Row, Col + 1, heightMap[Row][Col + 1]));
+        if (Row - 1 >= 0) neighbours.Add(new(Row - 1, Col, heightMap[Row - 1][Col]));
+        if (Row + 1 < height) neighbours.Add(new(Row + 1, Col, heightMap[Row + 1][Col]));
+        if (Col - 1 >= 0) neighbours.Add(new(Row, Col - 1, heightMap[Row][Col - 1]));
+        if (Col + 1 < width) neighbours.Add(new(Row, Col + 1, heightMap[Row][Col + 1]));
 
-            return neighbours;
-        }
-        if (Row - 1 >= 0 && heightMap[Row - 1][Col] - Elevation <= 1) neighbours.Add(new(Row - 1, Col, heightMap[Row - 1][Col]));
-        if (Row + 1 < height && heightMap[Row + 1][Col] - Elevation <= 1) neighbours.Add(new(Row + 1, Col, heightMap[Row + 1][Col]));
-        if (Col - 1 >= 0 && heightMap[Row][Col - 1] - Elevation <= 1) neighbours.Add(new(Row, Col - 1, heightMap[Row][Col - 1]));
-        if (Col + 1 < width && heightMap[Row][Col + 1] - Elevation <= 1) neighbours.Add(new(Row, Col + 1, heightMap[Row][Col + 1]));
-
-        return neighbours;
+        return goingDown ? neighbours.Where(point => point.Elevation - Elevation >= -1) : neighbours.Where(point => point.Elevation - Elevation <= 1);
     }
 
 }

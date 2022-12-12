@@ -7,17 +7,17 @@ namespace AoC2022;
 [AttributeUsage(AttributeTargets.Method)]
 public class PuzzleAttribute : TestAttribute, ITestBuilder, IImplyFixture
 {
-    public PuzzleAttribute(object expected, bool part2 = false) : base(expected)
+    public PuzzleAttribute(object expected, bool part2 = false) : base(expected, "Puzzle")
         => Filename = part2 ? "_2" : "";
 }
 
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
 public class ExampleAttribute : TestAttribute, ITestBuilder, IImplyFixture
 {
-    public ExampleAttribute(object expected, string input) : base(expected)
+    public ExampleAttribute(object expected, string input) : base(expected, "Example")
         => Input = input;
 
-    public ExampleAttribute(object expected, int input) : base(expected)
+    public ExampleAttribute(object expected, int input) : base(expected, $"Example {input}")
         => Filename = $"_Example_{input}";
 }
 
@@ -25,10 +25,14 @@ public abstract class TestAttribute : Attribute, ITestBuilder, IImplyFixture
 {
     internal string? Input;
     internal string? Filename;
+    internal string? NamePrefix;
     internal object Expected;
 
-    public TestAttribute(object expected)
-        => Expected = expected;
+    public TestAttribute(object expected, string name)
+    {
+        Expected = expected;
+        NamePrefix = name;
+    }
 
     public IEnumerable<TestMethod> BuildFrom(IMethodInfo method, Test? suite)
     {
@@ -38,7 +42,7 @@ public abstract class TestAttribute : Attribute, ITestBuilder, IImplyFixture
             ExpectedResult = Expected,
         };
         var test = new NUnitTestCaseBuilder().BuildTestMethod(method, suite, parameters);
-        test.Name = TestName(method, input); // TODO beter names
+        test.Name = TestName(method, input);
         yield return test;
     }
 
@@ -50,5 +54,5 @@ public abstract class TestAttribute : Attribute, ITestBuilder, IImplyFixture
     }
 
     protected virtual string TestName(IMethodInfo method, string input)
-        => $"{method.Name.Replace("_", " ")} Expected: {Expected} for {input}";
+        => $"{NamePrefix} Expected: {Expected} for {input}";
 }
