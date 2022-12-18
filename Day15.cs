@@ -4,19 +4,18 @@ namespace AoC2022;
 
 static class Day15
 {
-    static IList<string> ProcessInput(string input)
+    static (IList<string>, int) ProcessInput(string input)
     {
-        return input.Split(";").ToList();
+        var blocks = input.Split(";;").ToList();
+        return (blocks[0].Split(";").ToList(), blocks.Count > 1 ? 10 : 2000000);
     }
 
     [Example(expected: 26, input: 1)]
     [Puzzle(expected: 4725496)]
     public static int Part1(string input)
     {
-        var lineToCheck = 10;
-        var lineToCheck2 = 2000000;
+        (var processedInput, var lineToCheck) = ProcessInput(input);
         var noBeacon = new HashSet<int>();
-        var processedInput = ProcessInput(input);
         foreach (var line in processedInput)
         {
             var groups = Regex.Match(line, @"Sensor at x=(-*\d+), y=(-*\d+): closest beacon is at x=(-*\d+), y=(-*\d+)").Groups;
@@ -37,9 +36,9 @@ static class Day15
     [Puzzle(expected: 12051287042458)]
     public static long Part2(string input)
     {
-        //var limits = 20;
-        var limits = 4000000;
-        var noBeacons = ProcessInput(input).Select(x => new NoBeaconField(x));
+        (var processedInput, var lineToCheck) = ProcessInput(input);
+        var limits = lineToCheck * 2;
+        var noBeacons = processedInput.Select(x => new NoBeaconField(x));
         for (int i = 0; i <= limits; i++)
         {
             var notExcluded = new List<(int, int)> { (0, limits) };
