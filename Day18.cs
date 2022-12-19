@@ -13,27 +13,7 @@ static class Day18
         => CalcSurface(ProcessInput(input));
 
     private static int CalcSurface(HashSet<Coord3D> processedInput)
-    {
-        var totalSurface = 0;
-        var input = processedInput.ToList();
-        for (int i = 0; i < input.Count; i++)
-        {
-            totalSurface += 6;
-            for (int j = i + 1; j < input.Count; j++)
-            {
-                if (TouchFace(input[i], input[j])) totalSurface -= 2;
-            }
-        }
-        return totalSurface;
-    }
-
-    private static bool TouchFace(Coord3D block1, Coord3D block2)
-    {
-        var diff0 = int.Abs(block1.X - block2.X);
-        var diff1 = int.Abs(block1.Y - block2.Y);
-        var diff2 = int.Abs(block1.Z - block2.Z);
-        return diff0 + diff1 + diff2 == 1;
-    }
+        => processedInput.Sum(block => GetNeighbours(block).Where(x => !processedInput.Contains(x)).Count());
 
     [Example(expected: 58, input: "2,2,2;1,2,2;3,2,2;2,1,2;2,3,2;2,2,1;2,2,3;2,2,4;2,2,6;1,2,5;3,2,5;2,1,5;2,3,5")]
     [Puzzle(expected: 2044)]
@@ -100,13 +80,19 @@ static class Day18
 
     private static HashSet<Coord3D> GetUnevalNeighbours(Coord3D block, List<HashSet<Coord3D>> allShapes, HashSet<Coord3D> newShape, Coord3D min, Coord3D max)
     {
+        return GetNeighbours(block).Where(c => IsUnevaluated(c, allShapes, newShape, min, max)).ToHashSet();
+    }
+
+    private static HashSet<Coord3D> GetNeighbours(Coord3D block)
+    {
         (int i, int j, int k) = (block.X, block.Y, block.Z);
         return new List<Coord3D> {
             new Coord3D(i+1, j, k ), new Coord3D(i-1, j, k ),
             new Coord3D(i, j+1, k ), new Coord3D(i, j-1, k ),
-            new Coord3D(i, j, k+1 ), new Coord3D(i, j, k-1 ) }
-            .Where(c => IsUnevaluated(c, allShapes, newShape, min, max)).ToHashSet();
+            new Coord3D(i, j, k+1 ), new Coord3D(i, j, k-1 ) }.ToHashSet();
     }
+
+
 
     private static bool IsUnevaluated(Coord3D c, List<HashSet<Coord3D>> allShapes, HashSet<Coord3D> newShape, Coord3D min, Coord3D max)
     {
