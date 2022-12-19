@@ -12,54 +12,24 @@ static class Day18
     public static int Part1(string input)
         => CalcSurface(ProcessInput(input));
 
-    private static int CalcSurface(HashSet<Coord3D> processedInput)
-        => processedInput.Sum(block => GetNeighbours(block).Where(x => !processedInput.Contains(x)).Count());
+    private static int CalcSurface(HashSet<Coord3D> rocks)
+        => rocks.Sum(block => GetNeighbours(block).Where(x => !rocks.Contains(x)).Count());
 
     [Example(expected: 58, input: "2,2,2;1,2,2;3,2,2;2,1,2;2,3,2;2,2,1;2,2,3;2,2,4;2,2,6;1,2,5;3,2,5;2,1,5;2,3,5")]
     [Puzzle(expected: 2044)]
     public static int Part2(string input)
     {
-        var processedInput = ProcessInput(input);
-        var max = GetMaximum(processedInput);
-        var min = GetMinimum(processedInput);
-        var allShapes = new List<HashSet<Coord3D>> { processedInput };
-        for (int i = min.X; i < max.X; i++)
-        {
-            for (int j = min.Y; j < max.Y; j++)
-            {
-                for (int k = min.Z; k < max.Z; k++)
-                {
-                    var block = new Coord3D(i, j, k);
-                    if (allShapes.Any(shape => shape.Contains(block))) continue;
-                    allShapes.Add(GetAirShape(new Coord3D(i, j, k), min, max, allShapes));
-                }
-            }
-        }
-        return CalcSurface(processedInput) - allShapes.Skip(2).Sum(x => CalcSurface(x));
+        var rocks = ProcessInput(input);
+        var max = GetMaximum(rocks);
+        var min = GetMinimum(rocks);
+        var outSideShape = GetAirShape(min, min, max, rocks);
+        return CalcSurface2(rocks, outSideShape);
     }
 
-    // TODO vind de bug oorzaak
-    private static HashSet<Coord3D> GetAirShapeRecursive(Coord3D block, Coord3D min, Coord3D max, List<HashSet<Coord3D>> allShapes, HashSet<Coord3D> newShape, int depth)
-    {
-        if (depth == 3300)
-        {
-            Console.WriteLine(newShape.Count);
-        }
-        if (newShape.Count % 10 == 0 && newShape.Count > 3600)
-        {
-            Console.WriteLine(newShape.Count);
-        }
-        var neighbours = GetUnevalNeighbours(block, allShapes, newShape, min, max);
-        foreach (var neighbour in neighbours)
-        {
-            if (allShapes.Any(shape => shape.Contains(neighbour)) || newShape.Contains(neighbour) || OutsideScope(neighbour, min, max)) continue;
-            newShape.Add(neighbour);
-            GetAirShapeRecursive(neighbour, min, max, allShapes, newShape, depth + 1);
-        }
-        return newShape;
-    }
+    private static int CalcSurface2(HashSet<Coord3D> rocks, HashSet<Coord3D> outSideShape)
+        => rocks.Sum(block => GetNeighbours(block).Where(x => outSideShape.Contains(x)).Count());
 
-    private static HashSet<Coord3D> GetAirShape(Coord3D block, Coord3D min, Coord3D max, List<HashSet<Coord3D>> allShapes)
+    private static HashSet<Coord3D> GetAirShape(Coord3D block, Coord3D min, Coord3D max, HashSet<Coord3D> rocks)
     {
         var newShape = new HashSet<Coord3D>();
         var newBlocks = new HashSet<Coord3D> { block };
@@ -72,15 +42,15 @@ static class Day18
 
             foreach (var n in toEvalBlocks)
             {
-                newBlocks.UnionWith(GetUnevalNeighbours(n, allShapes, newShape, min, max));
+                newBlocks.UnionWith(GetUnevalNeighbours(n, rocks, newShape, min, max));
             }
         }
         return newShape;
     }
 
-    private static HashSet<Coord3D> GetUnevalNeighbours(Coord3D block, List<HashSet<Coord3D>> allShapes, HashSet<Coord3D> newShape, Coord3D min, Coord3D max)
+    private static HashSet<Coord3D> GetUnevalNeighbours(Coord3D block, HashSet<Coord3D> rocks, HashSet<Coord3D> newShape, Coord3D min, Coord3D max)
     {
-        return GetNeighbours(block).Where(c => IsUnevaluated(c, allShapes, newShape, min, max)).ToHashSet();
+        return GetNeighbours(block).Where(c => IsUnevaluated(c, rocks, newShape, min, max)).ToHashSet();
     }
 
     private static HashSet<Coord3D> GetNeighbours(Coord3D block)
@@ -92,11 +62,9 @@ static class Day18
             new Coord3D(i, j, k+1 ), new Coord3D(i, j, k-1 ) }.ToHashSet();
     }
 
-
-
-    private static bool IsUnevaluated(Coord3D c, List<HashSet<Coord3D>> allShapes, HashSet<Coord3D> newShape, Coord3D min, Coord3D max)
+    private static bool IsUnevaluated(Coord3D c, HashSet<Coord3D> rocks, HashSet<Coord3D> newShape, Coord3D min, Coord3D max)
     {
-        var inPrevshapes = allShapes.Any(shape => shape.Contains(c));
+        var inPrevshapes = rocks.Contains(c);
         var inNewShape = newShape.Contains(c);
         return !inPrevshapes && !inNewShape && InsideScope(c, min, max);
     }
@@ -110,7 +78,6 @@ static class Day18
         => neighbour.X < min.X || neighbour.X > max.X
         || neighbour.Y < min.Y || neighbour.Y > max.Y
         || neighbour.Z < min.Z || neighbour.Z > max.Z;
-
 
     private static Coord3D GetMinimum(HashSet<Coord3D> processedInput)
     {
