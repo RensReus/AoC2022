@@ -6,44 +6,43 @@ static class Day16
 {
     static IDictionary<string, Valve> ProcessInput(string input)
     {
-        return input.Split(";").ToList().Select(x => new Valve(x)).ToDictionary(x => x.Name, x => x);
+        var valves = input.Split(";").ToList().Select(x => new Valve(x)).ToDictionary(x => x.Name, x => x);
+        return valves.ToDictionary(valve => valve.Key, valve => GetDistances(valve.Value, valves));
     }
 
     [Example(expected: 1651, input: 1)]
     [Puzzle(expected: 1871)]
     public static int Part1(string input)
-    {
-        var valves = ProcessInput(input);
-        var evaluatedValves = valves.ToDictionary(valve => valve.Key, valve => GetAllRoutes(valve.Value, valves));
-        return GetFinishedRoutes(evaluatedValves, 30).Max(x => x.Value);
-    }
+        => GetFinishedRoutes(input, 30).Max(x => x.Value);
 
     [Example(expected: 1707, input: 1)]
     [Puzzle(expected: 2416)]
     public static int Part2(string input)
     {
-        var valves = ProcessInput(input);
-        var evaluatedValves = valves.ToDictionary(valve => valve.Key, valve => GetAllRoutes(valve.Value, valves));
-        var routes = GetFinishedRoutes(evaluatedValves, 26).ToList();
+        var routes = GetFinishedRoutes(input, 26).ToList();
         var maxPressure = 0;
         for (int i = 0; i < routes.Count; i++)
         {
+            var key1 = routes[i].Key;
+            var val1 = routes[i].Value;
             for (int j = i + 1; j < routes.Count; j++)
             {
-                if (routes[i].Key.Visited.Overlaps(routes[j].Key.Visited)) continue;
-                maxPressure = int.Max(maxPressure, routes[i].Value + routes[j].Value);
+                var total = val1 + routes[j].Value;
+                if ((key1 & routes[j].Key) > 0 || total <= maxPressure) continue;
+                maxPressure = total;
             }
         }
         return maxPressure;
     }
 
-    private static Dictionary<State, int> GetFinishedRoutes(IDictionary<string, Valve> valves, int maxMinutes)
+    private static Dictionary<int, int> GetFinishedRoutes(string input, int maxMinutes)
     {
-        var total = valves.Count(valve => valve.Value.FlowRate > 0);
-        var totalFlowRate = valves.Sum(valve => valve.Value.FlowRate);
+        var valves = ProcessInput(input);
+        var nonZeroValves = valves["AA"].DestinationsDetails.Select(x => x.Key).ToArray();
+        var maxOpenValves = nonZeroValves.Count();
         var toEvalDict = new Dictionary<int, List<State>> { { 0, new List<State> { new State("AA", 0) } } };
-        var possibleRoutes = new Dictionary<State, int>();
-        for (int i = 0; i < total; i++)
+        var possibleRoutes = new Dictionary<int, int>();
+        for (int i = 0; i < maxOpenValves; i++)
         {
             toEvalDict[i + 1] = new List<State>();
             foreach (var state in toEvalDict[i])
@@ -53,14 +52,18 @@ static class Day16
                     if (state.Minute + dest.Value >= maxMinutes || state.Visited.Contains(dest.Key)) continue;
                     var newState = state.Move(dest, valves);
                     toEvalDict[i + 1].Add(newState);
-                    possibleRoutes[newState] = newState.PressureReleased + newState.FlowRate * (maxMinutes - newState.Minute);
+                    var newPress = newState.PressureReleased + newState.FlowRate * (maxMinutes - newState.Minute);
+                    var key = newState.ToBinary(nonZeroValves);
+                    int oldPress = 0;
+                    if (possibleRoutes.TryGetValue(key, out oldPress) && oldPress > newPress) continue;
+                    possibleRoutes[key] = newPress;
                 }
             }
         }
         return possibleRoutes;
     }
 
-    private static Valve GetAllRoutes(Valve valve, IDictionary<string, Valve> valves)
+    private static Valve GetDistances(Valve valve, IDictionary<string, Valve> valves)
     {
         var toEval = valve.Destinations.Select(x => x);
         var evaluated = new Dictionary<string, int> { { valve.Name, 0 } };
@@ -127,6 +130,9 @@ internal class State
         }
         return hashCode;
     }
+
+    internal int ToBinary(string[] nonZeroValves)
+        => nonZeroValves.Select((x, i) => Visited.Contains(x) ? (int)Math.Pow(2, i) : 0).Sum();
 }
 
 public class Valve
