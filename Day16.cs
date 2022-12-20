@@ -14,235 +14,118 @@ static class Day16
     public static int Part1(string input)
     {
         var valves = ProcessInput(input);
-        var simplifiedValves = RemoveZeroValves(valves);
-        var nonZeroValves = simplifiedValves.Count(x => x.Value.FlowRate > 0);
-        var state = new State(0, 0, 0, nonZeroValves, new HashSet<string>(), simplifiedValves["AA"]);
-        var evaluatedStates = new Dictionary<string, int>();
-        (var answer, evaluatedStates) = EvaluateBranches(state, simplifiedValves, evaluatedStates);
-        Console.WriteLine("evaluated states:" + evaluatedStates.Count);
-        return answer;
-    }
-
-    private static IDictionary<string, Valve> RemoveZeroValves(IDictionary<string, Valve> valves)
-    {
-        var toRemove = valves.Where(valve => valve.Value.FlowRate == 0 && valve.Value.DestinationCosts.Count == 2).Select(x => x.Value);
-        foreach (var simplifyValve in toRemove)
-        {
-            var simplifyName = simplifyValve.Name;
-            var n0 = simplifyValve.DestinationCosts[0];
-            var n1 = simplifyValve.DestinationCosts[1];
-            var newStepCost = n0.Item2 + n1.Item2;
-            var index0 = valves[n0.Item1].DestinationCosts.FindIndex(x => x.Item1 == simplifyName);
-            valves[n0.Item1].DestinationCosts[index0] = (n1.Item1, newStepCost);
-            var index1 = valves[n1.Item1].DestinationCosts.FindIndex(x => x.Item1 == simplifyName);
-            valves[n1.Item1].DestinationCosts[index1] = (n0.Item1, newStepCost);
-            valves.Remove(simplifyName);
-        }
-        return valves;
-    }
-
-    private static (int, Dictionary<string, int>) EvaluateBranches(State state, IDictionary<string, Valve> valves, Dictionary<string, int> evaluatedStates)
-    {
-        evaluatedStates[state.ToEvaluatedString()] = state.PressureReleased;
-        if (state.Minute == 30)
-        {
-            return (state.PressureReleased, evaluatedStates);
-        }
-
-        var newStates = state.NextPossibleStates(valves, evaluatedStates);
-
-        if (newStates.Count() == 0 || state.OpenedValves.Count() == state.NonZeroValves)
-        {
-            if (state.FlowRate >= 81)
-            {
-                return (state.PressureReleased + (30 - state.Minute) * state.FlowRate, evaluatedStates);
-            }
-            return (state.PressureReleased + (30 - state.Minute) * state.FlowRate, evaluatedStates);
-        }
-        var best = 0;
-        foreach (var nextState in newStates)
-        {
-            var outcome = EvaluateBranches(nextState, valves, evaluatedStates);
-            evaluatedStates = outcome.Item2;
-            best = int.Max(outcome.Item1, best);
-        }
-        return (best, evaluatedStates);
+        var evaluatedValves = valves.ToDictionary(valve => valve.Key, valve => GetAllRoutes(valve.Value, valves));
+        return GetFinishedRoutes(evaluatedValves, 30).Max(x => x.Value);
     }
 
     [Example(expected: 1707, input: 1)]
-    [Puzzle(expected: 222222)]
+    [Puzzle(expected: 2416)]
     public static int Part2(string input)
     {
         var valves = ProcessInput(input);
-        var nonZeroValves = valves.Count(x => x.Value.FlowRate > 0);
-        var state = new State2(0, 0, 0, nonZeroValves, new HashSet<string>(), valves["AA"], valves["AA"]);
-        var evaluatedStates = new Dictionary<string, int>();
-        (var answer, evaluatedStates) = EvaluateBranches2(state, valves, evaluatedStates);
-        Console.WriteLine("evaluated states:" + evaluatedStates.Count);
-        return answer;
-    }
-
-    private static (int, Dictionary<string, int>) EvaluateBranches2(State2 state, IDictionary<string, Valve> valves, Dictionary<string, int> evaluatedStates)
-    {
-        if (state.Minute == 26)
+        var evaluatedValves = valves.ToDictionary(valve => valve.Key, valve => GetAllRoutes(valve.Value, valves));
+        var routes = GetFinishedRoutes(evaluatedValves, 26).ToList();
+        var maxPressure = 0;
+        for (int i = 0; i < routes.Count; i++)
         {
-            return (state.PressureReleased, evaluatedStates);
-        }
-        state.PressureReleased += state.FlowRate;
-        var newStates = state.NextPossibleStates(valves, evaluatedStates);
-
-        if (newStates.Count() == 0 || state.OpenedValves.Count() == state.NonZeroValves)
-        {
-            return (state.PressureReleased + (25 - state.Minute) * state.FlowRate, evaluatedStates);
-        }
-        var best = 0;
-        foreach (var nextState in newStates)
-        {
-            var outcome = EvaluateBranches2(nextState.Copy(), valves, evaluatedStates);
-            evaluatedStates = outcome.Item2;
-            best = int.Max(outcome.Item1, best);
-        }
-        return (best, evaluatedStates);
-    }
-}
-
-internal class State2
-{
-    public Valve[] Explorers;
-    public int Minute;
-    public int FlowRate;
-    public int PressureReleased;
-    public int NonZeroValves;
-    public HashSet<string> OpenedValves;
-
-    public State2(int minute, int flowRate, int pressureReleased, int nonZeroValves, HashSet<string> openedValves, Valve currValve, Valve elephantValve)
-    {
-        Minute = minute;
-        FlowRate = flowRate;
-        PressureReleased = pressureReleased;
-        OpenedValves = new(openedValves);
-        NonZeroValves = nonZeroValves;
-        Explorers = new Valve[] { currValve, elephantValve };
-    }
-
-    internal State2 Copy()
-        => new State2(Minute, FlowRate, PressureReleased, NonZeroValves, OpenedValves, Explorers[0], Explorers[1]);
-
-    internal IEnumerable<State2> NextPossibleStates(IDictionary<string, Valve> valves, Dictionary<string, int> evaluatedStates)
-    {
-        var allNewStates = new List<State2>();
-
-        var newStatesActionOne = Explorers[0].DestinationCosts.Select(x => NextState(valves[x.Item1], 0)).ToList();
-        if (Explorers[0].FlowRate > 0 && !OpenedValves.Contains(Explorers[0].Name))
-        {
-            newStatesActionOne = newStatesActionOne.Prepend(TurnOnValve(0)).ToList();
-        }
-
-        foreach (var newstate in newStatesActionOne)
-        {
-            var newStatesActionBoth = Explorers[1].DestinationCosts.Select(x => newstate.NextState(valves[x.Item1], 1)).ToList();
-            if (Explorers[1].FlowRate > 0 && !newstate.OpenedValves.Contains(Explorers[1].Name))
+            for (int j = i + 1; j < routes.Count; j++)
             {
-                newStatesActionBoth = newStatesActionBoth.Prepend(TurnOnValve(1)).ToList();
-            }
-            allNewStates.AddRange(newStatesActionBoth);
-        }
-
-        var b = new List<State2>();
-        foreach (var s in allNewStates)
-        {
-            var evalString = s.ToEvaluatedString();
-            var c = evaluatedStates.ContainsKey(evalString);
-            if (s.Minute <= 26 && (!evaluatedStates.ContainsKey(evalString) || evaluatedStates[evalString] < s.PressureReleased))
-            {
-                b.Add(s);
-                evaluatedStates[evalString] = s.PressureReleased;
+                if (routes[i].Key.Visited.Overlaps(routes[j].Key.Visited)) continue;
+                maxPressure = int.Max(maxPressure, routes[i].Value + routes[j].Value);
             }
         }
-        var a = allNewStates.Where(x => !evaluatedStates.ContainsKey(x.ToEvaluatedString()) || evaluatedStates[x.ToEvaluatedString()] < x.PressureReleased);
-        return b;
+        return maxPressure;
     }
 
-    internal State2 NextState(Valve nextValve, int i)
+    private static Dictionary<State, int> GetFinishedRoutes(IDictionary<string, Valve> valves, int maxMinutes)
     {
-        if (i == 0)
+        var total = valves.Count(valve => valve.Value.FlowRate > 0);
+        var totalFlowRate = valves.Sum(valve => valve.Value.FlowRate);
+        var toEvalDict = new Dictionary<int, List<State>> { { 0, new List<State> { new State("AA", 0) } } };
+        var possibleRoutes = new Dictionary<State, int>();
+        for (int i = 0; i < total; i++)
         {
-            return new State2(Minute, FlowRate, PressureReleased, NonZeroValves, OpenedValves, nextValve, Explorers[1]);
+            toEvalDict[i + 1] = new List<State>();
+            foreach (var state in toEvalDict[i])
+            {
+                foreach (var dest in valves[state.Current].DestinationsDetails)
+                {
+                    if (state.Minute + dest.Value >= maxMinutes || state.Visited.Contains(dest.Key)) continue;
+                    var newState = state.Move(dest, valves);
+                    toEvalDict[i + 1].Add(newState);
+                    possibleRoutes[newState] = newState.PressureReleased + newState.FlowRate * (maxMinutes - newState.Minute);
+                }
+            }
         }
-        return new State2(Minute + 1, FlowRate, PressureReleased, NonZeroValves, OpenedValves, Explorers[0], nextValve);
+        return possibleRoutes;
     }
 
-    internal string ToEvaluatedString()
+    private static Valve GetAllRoutes(Valve valve, IDictionary<string, Valve> valves)
     {
-        var openedValvesString = string.Join(",", OpenedValves.ToArray().Order());
-        var explorers = string.Join(",", Explorers.Select(x => x.Name).Order());
-        return $"Curr: {explorers};Time: {Minute};Opened: {openedValvesString}";
-    }
-
-    internal State2 TurnOnValve(int i)
-    {
-        var openedValves = new HashSet<string>(OpenedValves);
-        openedValves.Add(Explorers[i].Name);
-        return new State2(Minute + 1, FlowRate + Explorers[i].FlowRate, PressureReleased + FlowRate, NonZeroValves, openedValves, Explorers[0], Explorers[0]);
+        var toEval = valve.Destinations.Select(x => x);
+        var evaluated = new Dictionary<string, int> { { valve.Name, 0 } };
+        var steps = 0;
+        while (toEval.Any())
+        {
+            steps += 1;
+            var newToEval = new List<string>();
+            foreach (var dest in toEval)
+            {
+                evaluated[dest] = steps;
+                foreach (var dest2 in valves[dest].Destinations)
+                {
+                    if (evaluated.ContainsKey(dest2) || newToEval.Contains(dest2)) continue;
+                    newToEval.Add(dest2);
+                }
+            }
+            toEval = newToEval;
+        }
+        valve.DestinationsDetails = evaluated.Where(x => valves[x.Key].FlowRate > 0 && x.Key != valve.Name).ToDictionary(y => y.Key, y => y.Value + 1);
+        return valve;
     }
 }
 
 internal class State
 {
-    public int Minute;
+    public string Current;
+    internal int Minute;
+    public HashSet<string> Visited = new HashSet<string>();
     public int FlowRate;
     public int PressureReleased;
-    public int NonZeroValves;
-    public HashSet<string> OpenedValves;
-    public Valve CurrValve;
 
-    public State(int minute, int flowRate, int pressureReleased, int nonZeroValves, HashSet<string> openedValves, Valve currValve)
+    public State(string current, int minute)
     {
+        Current = current;
         Minute = minute;
-        FlowRate = flowRate;
+    }
+
+    public State(string current, int minute, int flowrate, int pressureReleased, HashSet<string> visited)
+    {
+        Current = current;
+        Minute = minute;
+        Visited = visited;
+        FlowRate = flowrate;
         PressureReleased = pressureReleased;
-        OpenedValves = new(openedValves);
-        CurrValve = currValve;
-        NonZeroValves = nonZeroValves;
     }
 
-    internal State NextState(Valve nextValve, int steps)
-        => new State(Minute + steps, FlowRate, PressureReleased + (FlowRate * steps), NonZeroValves, OpenedValves, nextValve);
-
-    internal IEnumerable<State> NextPossibleStates(IDictionary<string, Valve> valves, Dictionary<string, int> evaluatedStates)
+    internal State Move(KeyValuePair<string, int> dest, IDictionary<string, Valve> valves)
     {
-        var newStates = CurrValve.DestinationCosts.Select(x => NextState(valves[x.Item1], x.Item2)).ToList();
-        if (CurrValve.FlowRate > 0 && !OpenedValves.Contains(CurrValve.Name))
+        var newVisited = new HashSet<string> { dest.Key };
+        newVisited.UnionWith(Visited);
+        return new State(dest.Key, Minute + dest.Value, FlowRate + valves[dest.Key].FlowRate, PressureReleased + FlowRate * dest.Value, newVisited);
+    }
+
+    public override bool Equals(object? other)
+        => other is State s && s.Current == Current && s.Visited.SetEquals(Visited);
+
+    public override int GetHashCode()
+    {
+        var hashCode = Current.GetHashCode();
+        foreach (var valve in Visited)
         {
-            newStates = newStates.Prepend(TurnOnValve()).ToList();
+            hashCode = HashCode.Combine(hashCode, valve);
         }
-        var b = new List<State>();
-        foreach (var s in newStates)
-        {
-            var ss = s.ToEvaluatedString();
-            var c = evaluatedStates.ContainsKey(ss);
-            //var d = ;
-            if (s.Minute <= 30 && (!evaluatedStates.ContainsKey(ss) || evaluatedStates[ss] < s.PressureReleased))
-            {
-                b.Add(s);
-            }
-        }
-        var a = newStates.Where(x => !evaluatedStates.ContainsKey(x.ToEvaluatedString()) || evaluatedStates[x.ToEvaluatedString()] < x.PressureReleased);
-        return b;
-    }
-
-    internal string ToEvaluatedString()
-    {
-        var openedValvesString = string.Join(",", OpenedValves.ToArray().Order());
-        return $"Curr: {CurrValve.Name};Time: {Minute};Opened: {openedValvesString}";
-    }
-    // => $"Curr: {CurrValve.Name};Time: {Minute};Press: {PressureReleased};Opened: {string.Join(",", OpenedValves.ToArray().Order())}";
-
-    internal State TurnOnValve()
-    {
-        var openedValves = new HashSet<string>(OpenedValves);
-        openedValves.Add(CurrValve.Name);
-        return new State(Minute + 1, FlowRate + CurrValve.FlowRate, PressureReleased + FlowRate, NonZeroValves, openedValves, CurrValve);
+        return hashCode;
     }
 }
 
@@ -250,12 +133,14 @@ public class Valve
 {
     public string Name;
     public int FlowRate;
-    public List<(string, int)> DestinationCosts;
+    public List<string> Destinations;
+    public Dictionary<string, int> DestinationsDetails = new Dictionary<string, int>();
+
     public Valve(string line)
     {
         var groups = Regex.Match(line, @"Valve (.+) has flow rate=(.+)@ tunnels? leads? to valves? (.+)").Groups;
         Name = groups[1].Value;
         FlowRate = int.Parse(groups[2].Value);
-        DestinationCosts = groups[3].Value.Split(", ").Select(x => (x, 1)).ToList();
+        Destinations = groups[3].Value.Split(", ").ToList();
     }
 }
