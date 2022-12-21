@@ -14,15 +14,15 @@ static class Day19
     public static int Part1(string input)
     {
         var bluePrints = ProcessInput(input);
-        var mostGeode = bluePrints.Select(bluePrint => MostGeodes(bluePrint)).ToArray();
-        return mostGeode.Select((x, i) => x * (i+1)).Sum();
+        var mostGeode = bluePrints.Select(MostGeodes).ToArray();
+        return mostGeode.Select((x, i) => x * (i + 1)).Sum();
     }
 
     private static int MostGeodes(BluePrint bluePrint)
     {
         var currStates = new HashSet<BPState> { new BPState() };
         var nextStates = new HashSet<BPState>();
-        for (int minute = 0; minute < 24; minute++)
+        for (int minute = 1; minute < 24; minute++)
         {
             foreach (var state in currStates)
             {
@@ -35,14 +35,16 @@ static class Day19
             currStates = nextStates;
             nextStates = new HashSet<BPState>();
         }
-
-        return currStates.Max(state => state.Resources["geode"]);
+        currStates = currStates.Select(state => state.IncrementResources()).ToHashSet();
+        var max = currStates.Max(state => state.Resources["geode"]);
+        var bestStates = currStates.Where(state => state.Resources["geode"] == max);
+        return max;
     }
 
     private static HashSet<BPState> GetNextStates(BPState state, BluePrint bluePrint)
     {
         var possibleRobots = bluePrint.RobotCosts.Where(robot => state.EnoughResources(robot.Value) && state.NeedsRobot(robot.Key, bluePrint));
-        var newStates = possibleRobots.Select(robot => state.BuildRobot(robot)).ToHashSet();
+        var newStates = possibleRobots.Select(state.BuildRobot).ToHashSet();
         newStates.Add(state.IncrementResources());
         return newStates;
     }
@@ -134,10 +136,14 @@ internal class BPState
 
     private bool NeedsObsidianBot(BluePrint bluePrint)
     {
-        // maximaal geoderecipe.obsidian/ geoderecipe.ore
         // gaat ie sneller geode bot halen
         // hebben we het punt bereikt dat we alleen nog maar geode bots gaan maken
-        return Robots["clay"] < bluePrint.MaxClayBots;
+        return Robots["obsidian"] < bluePrint.MaxObsidianBots;
+    }
+
+    internal bool ShouldBuildNothing(BluePrint bluePrint)
+    {
+        return !EnoughResources(bluePrint.RobotCosts["geode"]);
     }
 }
 
