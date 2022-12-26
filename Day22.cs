@@ -85,25 +85,7 @@ static class Day22
     public static int Part2(string input)
     {
         (var forest, var moves, var startingCol, var faceSize) = ProcessInput(input);
-        var exampleTransitions = new List<string>
-        {
-            "D4UL3UU2UR6R",
-            "R3LU1UD5DL6D",
-            "L2RU1LR4LD5L",
-            "L3RU1DD5UR6U",
-            "U4DR6LD2DL3D",
-            "U4RR1RD2LL5R"
-        };
-        var actualTransitions = new List<string>
-        {
-            "U6LR2LL4LD3U",
-            "L1RR5RD3RU6D",
-            "U1DR2DD5UL4U",
-            "U3LR5LD6UL1L",
-            "L4RU3DR2RD6R",
-            "U4DR5DD2UL1U"
-        };
-        var faces = ExtractFaces(forest, faceSize, faceSize > 4 ? actualTransitions : exampleTransitions);
+        var faces = ExtractFaces(forest, faceSize);
         var position = new Position2(startingCol);
         foreach (var move in moves)
         {
@@ -130,7 +112,7 @@ static class Day22
         return position.Answer();
     }
 
-    private static List<Face> ExtractFaces(char[,] forest, int faceSize, List<string> transitions)
+    private static List<Face> ExtractFaces(char[,] forest, int faceSize)
     {
         var faces = new List<Face>();
         for (int row = 0; row < forest.GetLength(1) / faceSize; row++)
@@ -142,10 +124,6 @@ static class Day22
                     faces.Add(new(col, row, faceSize));
                 }
             }
-        }
-        for (int i = 0; i < faces.Count; i++)
-        {
-            faces[i].AddNeighbours(transitions[i]);
         }
         return faces;
     }
@@ -160,21 +138,12 @@ internal class Face
     public int Row;
     public int Col;
     public int FaceSize;
-    public Dictionary<char, Neighbour> Neighbours = new Dictionary<char, Neighbour>();
 
     public Face(int col, int row, int faceSize)
     {
         Row = row;
         Col = col;
         FaceSize = faceSize;
-    }
-
-    internal void AddNeighbours(string v)
-    {
-        for (int i = 0; i < 12; i += 3)
-        {
-            Neighbours[v[i]] = new Neighbour(v.Substring(i, 3));
-        }
     }
 }
 
@@ -227,10 +196,10 @@ internal class Position2
         var currentFace = faces[Face];
         (newCol, newRow, int newDir, int newFace) = (newCol, newRow) switch
         {
-            (_, _) when newCol > currentFace.MaxCol => ApplyTranslation(currentFace, 'R', faces),
-            (_, _) when newRow > currentFace.MaxRow => ApplyTranslation(currentFace, 'D', faces),
-            (_, _) when newCol < currentFace.MinCol => ApplyTranslation(currentFace, 'L', faces),
-            (_, _) when newRow < currentFace.MinRow => ApplyTranslation(currentFace, 'U', faces),
+            (_, _) when newCol > currentFace.MaxCol => ApplyTranslation(newCol, newRow, 'R'),
+            (_, _) when newRow > currentFace.MaxRow => ApplyTranslation(newCol, newRow, 'D'),
+            (_, _) when newCol < currentFace.MinCol => ApplyTranslation(newCol, newRow, 'L'),
+            (_, _) when newRow < currentFace.MinRow => ApplyTranslation(newCol, newRow, 'U'),
             (_, _) => (newCol, newRow, Direction, Face)
         };
         return (newCol, newRow, newFace, newDir, forest[newCol, newRow] is '.');
@@ -246,35 +215,48 @@ internal class Position2
             _ => throw new InvalidDataException()
         };
 
-    private (int newCol, int newRow, int newDir, int newFace) ApplyTranslation(Face currentFace, char soure, List<Face> faces)
-    {
-        var neighbour = currentFace.Neighbours[soure];
-        var newFaceint = neighbour.Face;
-        var newDir = GetNewDir(neighbour.DestSide);
-        var relCol = Col - currentFace.MinCol;
-        var relRow = Row - currentFace.MinRow;
-        var faceSizeOffset = currentFace.FaceSize - 1;
-        (var newCol, var newRow) = neighbour.Rotation switch
+    private (int newCol, int newRow, int newDir, int newFace) ApplyTranslation(int newCol, int newRow, char source)
+        => (Face, source) switch
         {
-            1 => (faceSizeOffset - relRow, relCol),
-            2 => (faceSizeOffset - relCol, faceSizeOffset - relRow),
-            3 => (relRow, faceSizeOffset - relCol),
-            _ => (relCol % faceSizeOffset, relRow % faceSizeOffset)
+            (0, 'D') => (newCol, newRow, Direction, 2),
+            (0, 'R') => (newCol, newRow, Direction, 1),
+            (1, 'L') => (newCol, newRow, Direction, 0),
+            (2, 'U') => (newCol, newRow, Direction, 0),
+            (2, 'D') => (newCol, newRow, Direction, 4),
+            (3, 'R') => (newCol, newRow, Direction, 4),
+            (3, 'D') => (newCol, newRow, Direction, 5),
+            (4, 'U') => (newCol, newRow, Direction, 2),
+            (4, 'L') => (newCol, newRow, Direction, 3),
+            (5, 'U') => (newCol, newRow, Direction, 3),
+            _ => ComplexereTransitie(newCol, newRow, source)
         };
-        var newFace = faces[newFaceint];
-        var absCol = newCol + newFace.MinCol;
-        var absRow = newRow + newFace.MinRow;
-        return (absCol, absRow, newDir, newFaceint);
-    }
 
-    private int GetNewDir(char destSide)
-        => destSide switch
+    private (int newCol, int newRow, int Direction, int) ComplexereTransitie(int newCol, int newRow, char source)
+        => (Face, source) switch
         {
-            'R' => 2,
-            'U' => 1,
-            'D' => 3,
-            _ => 0
+            (0, 'L') => (Col - 50, FlipCoord(newRow - currface.MinCol) - newFace.MinRow, 0, 5), // Flipcoord moet met relative coords
+            (1, 'R') => (Col - 50, FlipCoord(newRow) - 100, 2, 4),
+            (1, 'U') => (Col - 100, newRow - 150, Direction, 5),
+            (3, 'L') => (Col + 50, FlipCoord(newRow) + 100, 0, 0),
+            (4, 'R') => (Col + 50, FlipCoord(newRow) + 100, 2, 1),
+            (5, 'D') => (Col + 50, newRow + 150, Direction, 1),
+            _ => NogComplexer(newCol, newRow, source)
         };
+
+
+    private (int, int, int, int) NogComplexer(int newCol, int newRow, char source)
+        => (Face, source) switch
+        {
+            (0, 'U') => (Row, FlipCoord(Col) + 100, 0, 5),
+            (1, 'D') => (Row + 50, FlipCoord(Col) - 50, 2, 2),
+            (2, 'R') => (FlipCoord(Row), 50, 3, 1),
+            _ => throw new ArgumentOutOfRangeException()
+        };
+
+    private int FlipCoord(int oldCoord)
+    {
+        return 49 - oldCoord;
+    }
 
     internal void Rotate(char rotationDirection)
         => Direction = (Direction + 4 + (rotationDirection == 'R' ? 1 : -1)) % 4;
