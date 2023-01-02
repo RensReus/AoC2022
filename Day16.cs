@@ -40,11 +40,11 @@ static class Day16
         var valves = ProcessInput(input);
         var valvesNumeric = valves["AA"].DestinationsDetails.Select((name, index) => (name.Key, index)).ToDictionary(x => x.Key, x => (int)Math.Pow(2, x.index));
         var maxOpenValves = valvesNumeric.Count();
-        var toEvalDict = new Dictionary<int, HashSet<State>> { { 0, new HashSet<State> { new State("AA", 0) } } };
+        var toEvalDict = new Dictionary<int, List<State>> { { 0, new List<State> { new State("AA", 0) } } };
         var possibleRoutes = new Dictionary<int, int>();
         for (int i = 0; i < maxOpenValves; i++)
         {
-            toEvalDict[i + 1] = new HashSet<State>();
+            toEvalDict[i + 1] = new List<State>();
             foreach (var state in toEvalDict[i])
             {
                 foreach (var dest in valves[state.Current].DestinationsDetails)
@@ -58,7 +58,6 @@ static class Day16
                 }
             }
         }
-        var a = toEvalDict.Sum(x => x.Value.Count);
         return possibleRoutes;
     }
 
@@ -106,12 +105,6 @@ internal class State
 
     internal State Move(KeyValuePair<string, int> dest, IDictionary<string, Valve> valves, IDictionary<string, int> valvesNumeric)
         => new State(dest.Key, Minute + dest.Value, FlowRate + valves[dest.Key].FlowRate, PressureReleased + FlowRate * dest.Value, Visited + valvesNumeric[dest.Key]);
-
-    public override bool Equals(object? other)
-        => other is State s && s.Current == Current && (s.Visited & Visited) == Visited;
-
-    public override int GetHashCode()
-        => HashCode.Combine(Current, Visited);
 }
 
 public class Valve
