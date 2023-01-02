@@ -38,28 +38,27 @@ static class Day16
     private static Dictionary<int, int> GetFinishedRoutes(string input, int maxMinutes)
     {
         var valves = ProcessInput(input);
-        var nonZeroValves = valves["AA"].DestinationsDetails.Select(x => x.Key).ToArray();
-        var maxOpenValves = nonZeroValves.Count();
-        var toEvalDict = new Dictionary<int, List<State>> { { 0, new List<State> { new State("AA", 0) } } };
+        var valvesNumeric = valves["AA"].DestinationsDetails.Select((name, index) => (name.Key, index)).ToDictionary(x => x.Key, x => (int)Math.Pow(2, x.index));
+        var maxOpenValves = valvesNumeric.Count();
+        var toEvalDict = new Dictionary<int, HashSet<State>> { { 0, new HashSet<State> { new State("AA", 0) } } };
         var possibleRoutes = new Dictionary<int, int>();
         for (int i = 0; i < maxOpenValves; i++)
         {
-            toEvalDict[i + 1] = new List<State>();
+            toEvalDict[i + 1] = new HashSet<State>();
             foreach (var state in toEvalDict[i])
             {
                 foreach (var dest in valves[state.Current].DestinationsDetails)
                 {
-                    if (state.Minute + dest.Value >= maxMinutes || state.Visited.Contains(dest.Key)) continue;
-                    var newState = state.Move(dest, valves);
-                    toEvalDict[i + 1].Add(newState);
+                    if (state.Minute + dest.Value >= maxMinutes || (state.Visited & valvesNumeric[dest.Key]) == valvesNumeric[dest.Key]) continue;
+                    var newState = state.Move(dest, valves, valvesNumeric);
                     var newPress = newState.PressureReleased + newState.FlowRate * (maxMinutes - newState.Minute);
-                    var key = newState.ToBinary(nonZeroValves);
-                    int oldPress = 0;
-                    if (possibleRoutes.TryGetValue(key, out oldPress) && oldPress > newPress) continue;
-                    possibleRoutes[key] = newPress;
+                    toEvalDict[i + 1].Add(newState);
+                    if (possibleRoutes.TryGetValue(newState.Visited, out int oldPress) && oldPress > newPress) continue;
+                    possibleRoutes[newState.Visited] = newPress;
                 }
             }
         }
+        var a = toEvalDict.Sum(x => x.Value.Count);
         return possibleRoutes;
     }
 
@@ -92,17 +91,11 @@ internal class State
 {
     public string Current;
     internal int Minute;
-    public HashSet<string> Visited = new HashSet<string>();
+    public int Visited;
     public int FlowRate;
     public int PressureReleased;
 
-    public State(string current, int minute)
-    {
-        Current = current;
-        Minute = minute;
-    }
-
-    public State(string current, int minute, int flowrate, int pressureReleased, HashSet<string> visited)
+    public State(string current, int minute, int flowrate = 0, int pressureReleased = 0, int visited = 0)
     {
         Current = current;
         Minute = minute;
@@ -111,28 +104,14 @@ internal class State
         PressureReleased = pressureReleased;
     }
 
-    internal State Move(KeyValuePair<string, int> dest, IDictionary<string, Valve> valves)
-    {
-        var newVisited = new HashSet<string> { dest.Key };
-        newVisited.UnionWith(Visited);
-        return new State(dest.Key, Minute + dest.Value, FlowRate + valves[dest.Key].FlowRate, PressureReleased + FlowRate * dest.Value, newVisited);
-    }
+    internal State Move(KeyValuePair<string, int> dest, IDictionary<string, Valve> valves, IDictionary<string, int> valvesNumeric)
+        => new State(dest.Key, Minute + dest.Value, FlowRate + valves[dest.Key].FlowRate, PressureReleased + FlowRate * dest.Value, Visited + valvesNumeric[dest.Key]);
 
     public override bool Equals(object? other)
-        => other is State s && s.Current == Current && s.Visited.SetEquals(Visited);
+        => other is State s && s.Current == Current && (s.Visited & Visited) == Visited;
 
     public override int GetHashCode()
-    {
-        var hashCode = Current.GetHashCode();
-        foreach (var valve in Visited)
-        {
-            hashCode = HashCode.Combine(hashCode, valve);
-        }
-        return hashCode;
-    }
-
-    internal int ToBinary(string[] nonZeroValves)
-        => nonZeroValves.Select((x, i) => Visited.Contains(x) ? (int)Math.Pow(2, i) : 0).Sum();
+        => HashCode.Combine(Current, Visited);
 }
 
 public class Valve
