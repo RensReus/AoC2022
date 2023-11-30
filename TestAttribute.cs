@@ -37,7 +37,7 @@ public abstract class TestAttribute : Attribute, ITestBuilder, IImplyFixture
     public IEnumerable<TestMethod> BuildFrom(IMethodInfo method, Test? suite)
     {
         var input = Input ?? ReadInput(method.MethodInfo.DeclaringType);
-        var parameters = new TestCaseParameters(new object[] { input })
+        var parameters = new TestCaseParameters([input])
         {
             ExpectedResult = Expected,
         };
