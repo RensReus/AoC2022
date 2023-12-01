@@ -234,7 +234,7 @@ internal class Position2
     private (int newCol, int newRow, int Direction, int) ComplexereTransitie(int newCol, int newRow, char source)
         => (Face, source) switch
         {
-            (0, 'L') => (Col - 50, FlipCoord(newRow - currface.MinCol) - newFace.MinRow, 0, 5), // Flipcoord moet met relative coords
+            //(0, 'L') => (Col - 50, FlipCoord(newRow - currface.MinCol) - newFace.MinRow, 0, 5), // Flipcoord moet met relative coords
             (1, 'R') => (Col - 50, FlipCoord(newRow) - 100, 2, 4),
             (1, 'U') => (Col - 100, newRow - 150, Direction, 5),
             (3, 'L') => (Col + 50, FlipCoord(newRow) + 100, 0, 0),

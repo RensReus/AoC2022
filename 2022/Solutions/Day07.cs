@@ -5,7 +5,9 @@ class Day07
     static Dir ProcessInput(string input)
     {
         var lines = input.Split(";").ToList().Where(x => !x.Contains("$ ls"));
+#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
         var topDir = new Dir("/", null);
+#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
         var currDir = topDir;
         foreach (var line in lines.Skip(1))
         {

@@ -31,7 +31,9 @@ internal class Monkey21
     private long? Value;
     public string Name;
 
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
     public Monkey21(string line)
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
     {
         var strings = line.Split(": ")[1].Split(" ");
         Name = line.Split(": ")[0];

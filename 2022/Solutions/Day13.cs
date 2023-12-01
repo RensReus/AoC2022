@@ -84,7 +84,9 @@ class Day13
 
 public class MyComparer : IComparer<String>
 {
-    public int Compare(String stringA, String stringB)
+#pragma warning disable CS8767 // Nullability of reference types in type of parameter doesn't match implicitly implemented member (possibly because of nullability attributes).
+    public int Compare(string stringA, string stringB)
+#pragma warning restore CS8767 // Nullability of reference types in type of parameter doesn't match implicitly implemented member (possibly because of nullability attributes).
     {
         var day = new Day13();
         var response = (int)day.Compare(stringA, stringB);

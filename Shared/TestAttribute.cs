@@ -2,7 +2,7 @@ using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
 using NUnit.Framework.Internal.Builders;
 
-namespace AoC2022;
+namespace AoC.Shared;
 
 [AttributeUsage(AttributeTargets.Method)]
 public class PuzzleAttribute : TestAttribute
@@ -36,7 +36,9 @@ public abstract class TestAttribute : Attribute, ITestBuilder, IImplyFixture
 
     public IEnumerable<TestMethod> BuildFrom(IMethodInfo method, Test? suite)
     {
+#pragma warning disable CS8604 // Possible null reference argument.
         var input = Input ?? ReadInput(method.MethodInfo.DeclaringType);
+#pragma warning restore CS8604 // Possible null reference argument.
         var parameters = new TestCaseParameters([input])
         {
             ExpectedResult = Expected,
@@ -46,10 +48,12 @@ public abstract class TestAttribute : Attribute, ITestBuilder, IImplyFixture
         yield return test;
     }
 
-    private string ReadInput(Type? declaringType)
+    private string ReadInput(Type declaringType)
     {
-        var filename = declaringType?.ToString().Substring(8) + Filename;
-        var path = Path.Combine(Directory.GetCurrentDirectory(), $"Inputs/{filename}.txt");
+        var filename = declaringType.ToString()[8..] + Filename;
+        var year = declaringType.Namespace![3..];
+
+        var path = Path.Combine(Directory.GetCurrentDirectory(), $"{year}/Inputs/{filename}.txt");
         return File.ReadAllText(path).TrimEnd().Replace("\r\n", ";");
     }
 
