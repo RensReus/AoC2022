@@ -36,9 +36,7 @@ public abstract class TestAttribute : Attribute, ITestBuilder, IImplyFixture
 
     public IEnumerable<TestMethod> BuildFrom(IMethodInfo method, Test? suite)
     {
-#pragma warning disable CS8604 // Possible null reference argument.
-        var input = Input ?? ReadInput(method.MethodInfo.DeclaringType);
-#pragma warning restore CS8604 // Possible null reference argument.
+        var input = Input ?? ReadInput(method.MethodInfo.DeclaringType!);
         var parameters = new TestCaseParameters([input])
         {
             ExpectedResult = Expected,
@@ -54,9 +52,9 @@ public abstract class TestAttribute : Attribute, ITestBuilder, IImplyFixture
         var year = declaringType.Namespace![3..];
 
         var path = Path.Combine(Directory.GetCurrentDirectory(), $"{year}/Inputs/{filename}.txt");
-        return File.ReadAllText(path).TrimEnd().Replace("\r\n", ";");
+        return File.ReadAllText(path).TrimEnd();
     }
 
     protected virtual string TestName(IMethodInfo method, string input)
-        => $"{NamePrefix} Expected: {Expected} for {input}";
+        => $"{NamePrefix} Expected: {Expected} for {input[..50]}";
 }

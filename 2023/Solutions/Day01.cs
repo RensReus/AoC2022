@@ -2,11 +2,11 @@ namespace AoC2023;
 
 static class Day01
 {
-    private static string[] NumberStrings = new string[] { "one", "two", "three", "four", "five", "six", "seven", "eight", "nine" };
+    private static readonly string[] NumberStrings = ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"];
 
     static IList<string> ProcessInput(string input)
     {
-        return input.Split(";").ToList();
+        return input.Split("\r\n").ToList();
     }
 
     [Example(expected: 142, input: "1abc2;pqr3stu8vwx;a1b2c3d4e5f;treb7uchet")]
@@ -22,7 +22,7 @@ static class Day01
         return output;
     }
 
-    [Example(expected: 281, input: "two1nine;eightwothree;abcone2threexyz;xtwone3four;4nineeightseven2;zoneight234;7pqrstsixteen")]
+    [Example(expected: 281, input: "two1nine\r\neightwothree\r\nabcone2threexyz\r\nxtwone3four\r\n4nineeightseven2\r\nzoneight234\r\n7pqrstsixteen")]
     [Puzzle(expected: 53389)]
     public static int Part2(string input)
     {
