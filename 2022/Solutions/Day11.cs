@@ -1,10 +1,10 @@
 using System.Data;
 namespace AoC2022;
 
-class Day11
+class Day11 : BaseDay
 {
     static IList<Monkey> ProcessInput(string input)
-        => input.Split(";;").Select(x => new Monkey(x)).ToList();
+        => input.Split("\n\n").Select(x => new Monkey(x)).ToList();
 
     [Example(expected: 10605, input: 1)]
     [Puzzle(expected: 66802)]
@@ -62,7 +62,7 @@ internal class Monkey
     public int EvaluatedItems;
     public Monkey(string x)
     {
-        var lines = x.Split(";");
+        var lines = x.Split("\n");
         var items = lines[1].Split(":")[1].Split(",").Select(x => int.Parse(x));
         foreach (var item in items)
         {

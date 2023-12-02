@@ -1,13 +1,13 @@
 namespace AoC2022;
 
-static class Day18
+class Day18 : BaseDay
 {
     static HashSet<Coord3D> ProcessInput(string input)
     {
-        return input.Split(";").Select(x => new Coord3D(x)).ToHashSet();
+        return input.Split("\n").Select(x => new Coord3D(x)).ToHashSet();
     }
 
-    [Example(expected: 64, input: "2,2,2;1,2,2;3,2,2;2,1,2;2,3,2;2,2,1;2,2,3;2,2,4;2,2,6;1,2,5;3,2,5;2,1,5;2,3,5")]
+    [Example(expected: 64, input: "2,2,2\n1,2,2\n3,2,2\n2,1,2\n2,3,2\n2,2,1\n2,2,3\n2,2,4\n2,2,6\n1,2,5\n3,2,5\n2,1,5\n2,3,5")]
     [Puzzle(expected: 3396)]
     public static int Part1(string input)
         => CalcSurface(ProcessInput(input));
@@ -15,7 +15,7 @@ static class Day18
     private static int CalcSurface(HashSet<Coord3D> rocks)
         => rocks.Sum(block => GetNeighbours(block).Where(x => !rocks.Contains(x)).Count());
 
-    [Example(expected: 58, input: "2,2,2;1,2,2;3,2,2;2,1,2;2,3,2;2,2,1;2,2,3;2,2,4;2,2,6;1,2,5;3,2,5;2,1,5;2,3,5")]
+    [Example(expected: 58, input: "2,2,2\n1,2,2\n3,2,2\n2,1,2\n2,3,2\n2,2,1\n2,2,3\n2,2,4\n2,2,6\n1,2,5\n3,2,5\n2,1,5\n2,3,5")]
     [Puzzle(expected: 2044)]
     public static int Part2(string input)
     {

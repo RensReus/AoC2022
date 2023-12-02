@@ -2,12 +2,12 @@ using System.Text.RegularExpressions;
 
 namespace AoC2022;
 
-class Day05
+class Day05 : BaseDay
 {
     static (List<List<char>>, IEnumerable<Instruction>) ProcessInput(string input)
     {
-        var inputparts = input.Split(";;");
-        var initialstate = inputparts[0].Split(";");
+        var inputparts = input.Split("\n\n");
+        var initialstate = inputparts[0].Split("\n");
         var stacks = initialstate.Last().Split("   ").Select(x => new List<char>()).ToList();
         foreach (var line in initialstate.Take(initialstate.Length - 1).Reverse())
         {
@@ -21,7 +21,7 @@ class Day05
             }
         }
 
-        var moves = inputparts[1].Split(";").Select(line => new Instruction(Regex.Match(line, @"move (\d+) from (\d+) to (\d+)").Groups));
+        var moves = inputparts[1].Split("\n").Select(line => new Instruction(Regex.Match(line, @"move (\d+) from (\d+) to (\d+)").Groups));
         return (stacks, moves);
     }
 

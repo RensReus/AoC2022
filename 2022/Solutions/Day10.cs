@@ -1,15 +1,12 @@
 namespace AoC2022;
 
-class Day10
+class Day10 : BaseDay
 {
-    static IList<string> ProcessInput(string input)
-        => input.Split(";").ToList();
-
     [Example(expected: 13140, input: 1)]
     [Puzzle(expected: 11780)]
     public int Part1(string input)
     {
-        var processedInput = ProcessInput(input);
+        var processedInput = ReadLines(input);
         var x = 1;
         var cycle = 1;
         int answer = 0;
@@ -40,7 +37,7 @@ class Day10
     public string Part2(string input)
     {
         var x = 1;
-        var processedInput = ProcessInput(input);
+        var processedInput = ReadLines(input);
         var cycle = 1;
         var answer = "";
         foreach (var line in processedInput)

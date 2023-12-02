@@ -2,11 +2,11 @@ using System.Text.RegularExpressions;
 
 namespace AoC2022;
 
-static class Day16
+class Day16 : BaseDay
 {
     static IDictionary<string, Valve> ProcessInput(string input)
     {
-        var valves = input.Split(";").ToList().Select(x => new Valve(x)).ToDictionary(x => x.Name, x => x);
+        var valves = ReadLines(input).Select(x => new Valve(x)).ToDictionary(x => x.Name, x => x);
         return valves.ToDictionary(valve => valve.Key, valve => GetDistances(valve.Value, valves));
     }
 

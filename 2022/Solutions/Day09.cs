@@ -1,20 +1,17 @@
 namespace AoC2022;
 
-class Day09
+class Day09 : BaseDay
 {
-    static IList<string> ProcessInput(string input)
-        => input.Split(";").ToList();
-
-    [Example(expected: 13, input: "R 4;U 4;L 3;D 1;R 4;D 1;L 5;R 2")]
+    [Example(expected: 13, input: "R 4\nU 4\nL 3\nD 1\nR 4\nD 1\nL 5\nR 2")]
     [Puzzle(expected: 6057)]
     public int Part1(string input)
-        => UniqueVisitedFieldsCount(ProcessInput(input), 2);
+        => UniqueVisitedFieldsCount(ReadLines(input), 2);
 
-    [Example(expected: 1, input: "R 4;U 4;L 3;D 1;R 4;D 1;L 5;R 2")]
-    [Example(expected: 36, input: "R 5;U 8;L 8;D 3;R 17;D 10;L 25;U 20")]
+    [Example(expected: 1, input: "R 4\nU 4\nL 3\nD 1\nR 4\nD 1\nL 5\nR 2")]
+    [Example(expected: 36, input: "R 5\nU 8\nL 8\nD 3\nR 17\nD 10\nL 25\nU 20")]
     [Puzzle(expected: 2514)]
     public int Part2(string input)
-        => UniqueVisitedFieldsCount(ProcessInput(input), 10);
+        => UniqueVisitedFieldsCount(ReadLines(input), 10);
 
     public int UniqueVisitedFieldsCount(IList<string> input, int ropeLength)
     {

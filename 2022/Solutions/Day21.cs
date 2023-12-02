@@ -1,11 +1,11 @@
 namespace AoC2022;
 
-static class Day21
+class Day21 : BaseDay
 {
     static Dictionary<string, Monkey21> ProcessInput(string input)
-        => input.Split(";").ToDictionary(x => x.Split(":")[0], x => new Monkey21(x));
+        => input.Split("\n").ToDictionary(x => x.Split(":")[0], x => new Monkey21(x));
 
-    [Example(expected: 152, input: "root: pppw + sjmn;dbpl: 5;cczh: sllz + lgvd;zczc: 2;ptdq: humn - dvpt;dvpt: 3;lfqf: 4;humn: 5;ljgn: 2;sjmn: drzm * dbpl;sllz: 4;pppw: cczh / lfqf;lgvd: ljgn * ptdq;drzm: hmdt - zczc;hmdt: 32")]
+    [Example(expected: 152, input: "root: pppw + sjmn\ndbpl: 5\ncczh: sllz + lgvd\nzczc: 2\nptdq: humn - dvpt\ndvpt: 3\nlfqf: 4\nhumn: 5\nljgn: 2\nsjmn: drzm * dbpl\nsllz: 4\npppw: cczh / lfqf\nlgvd: ljgn * ptdq\ndrzm: hmdt - zczc\nhmdt: 32")]
     [Puzzle(expected: 22382838633806)]
     public static long Part1(string input)
     {
@@ -13,7 +13,7 @@ static class Day21
         return monkeys["root"].GetValue(monkeys);
     }
 
-    [Example(expected: 301, input: "root: pppw + sjmn;dbpl: 5;cczh: sllz + lgvd;zczc: 2;ptdq: humn - dvpt;dvpt: 3;lfqf: 4;humn: 5;ljgn: 2;sjmn: drzm * dbpl;sllz: 4;pppw: cczh / lfqf;lgvd: ljgn * ptdq;drzm: hmdt - zczc;hmdt: 32")]
+    [Example(expected: 301, input: "root: pppw + sjmn\ndbpl: 5\ncczh: sllz + lgvd\nzczc: 2\nptdq: humn - dvpt\ndvpt: 3\nlfqf: 4\nhumn: 5\nljgn: 2\nsjmn: drzm * dbpl\nsllz: 4\npppw: cczh / lfqf\nlgvd: ljgn * ptdq\ndrzm: hmdt - zczc\nhmdt: 32")]
     [Puzzle(expected: 3099532691300)]
     public static long Part2(string input)
     {

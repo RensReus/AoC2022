@@ -1,10 +1,10 @@
 namespace AoC2022;
 
-class Day14
+class Day14 : BaseDay
 {
     static (char[,], int) ProcessInput(string input, bool part2 = false)
     {
-        var inputCoords = input.Split(";")
+        var inputCoords = input.Split("\n")
             .Select(x =>
                 x.Split(" -> ")
                     .Select(y => (int.Parse(y.Split(",")[0]), int.Parse(y.Split(",")[1]))));
@@ -57,7 +57,7 @@ class Day14
         return (state, maxY);
     }
 
-    [Example(expected: 24, input: "498,4 -> 498,6 -> 496,6;503,4 -> 502,4 -> 502,9 -> 494,9")]
+    [Example(expected: 24, input: "498,4 -> 498,6 -> 496,6\n503,4 -> 502,4 -> 502,9 -> 494,9")]
     [Puzzle(expected: 1330)]
     public int Part1(string input)
     {
@@ -105,7 +105,7 @@ class Day14
         return (state, false);
     }
 
-    [Example(expected: 93, input: "498,4 -> 498,6 -> 496,6;503,4 -> 502,4 -> 502,9 -> 494,9")]
+    [Example(expected: 93, input: "498,4 -> 498,6 -> 496,6\n503,4 -> 502,4 -> 502,9 -> 494,9")]
     [Puzzle(expected: 26139)]
     public int Part2(string input)
     {

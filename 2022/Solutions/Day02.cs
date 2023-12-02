@@ -1,16 +1,16 @@
 namespace AoC2022;
 
-class Day02
+class Day02 : BaseDay
 {
     static IEnumerable<IEnumerable<string>> ProcessInput(string input)
-        => input.Split(";").Select(line => line.Split(" "));
+        => input.Split("\n").Select(line => line.Split(" "));
 
-    [Example(expected: 15, input: "A Y;B X;C Z")]
+    [Example(expected: 15, input: "A Y\nB X\nC Z")]
     [Puzzle(expected: 10718)]
     public int Part1(string input)
          => ProcessInput(input).Sum(x => RoundScore1(x.ElementAt(0), x.ElementAt(1)));
 
-    [Example(expected: 12, input: "A Y;B X;C Z")]
+    [Example(expected: 12, input: "A Y\nB X\nC Z")]
     [Puzzle(expected: 14652)]
     public int Part2(string input)
          => ProcessInput(input).Sum(x => RoundScore2(x.ElementAt(0), x.ElementAt(1)));

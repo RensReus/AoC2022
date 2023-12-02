@@ -2,17 +2,17 @@ using System.Text.RegularExpressions;
 
 namespace AoC2022;
 
-class Day04
+class Day04 : BaseDay
 {
     static IList<ElfPair> ProcessInput(string input)
-        => input.Split(";").Select(x => new ElfPair(x)).ToList();
+        => input.Split("\n").Select(x => new ElfPair(x)).ToList();
 
-    [Example(expected: 2, input: "2-4,6-8;2-3,4-5;5-7,7-9;2-8,3-7;6-6,4-6;2-6,4-8")]
+    [Example(expected: 2, input: "2-4,6-8\n2-3,4-5\n5-7,7-9\n2-8,3-7\n6-6,4-6\n2-6,4-8")]
     [Puzzle(expected: 471)]
     public int Part1(string input)
         => ProcessInput(input).Select(x => x.HasFullOverlap()).Sum();
 
-    [Example(expected: 4, input: "2-4,6-8;2-3,4-5;5-7,7-9;2-8,3-7;6-6,4-6;2-6,4-8")]
+    [Example(expected: 4, input: "2-4,6-8\n2-3,4-5\n5-7,7-9\n2-8,3-7\n6-6,4-6\n2-6,4-8")]
     [Puzzle(expected: 888)]
     public int Part2(string input)
         => ProcessInput(input).Select(x => x.HasAnyOverlap()).Sum();

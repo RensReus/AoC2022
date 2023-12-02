@@ -2,14 +2,14 @@ using System.Text.RegularExpressions;
 
 namespace AoC2022;
 
-static class Day19
+class Day19 : BaseDay
 {
     static IList<BluePrint> ProcessInput(string input)
     {
-        return input.Split(";").Select(x => new BluePrint(x)).ToList();
+        return input.Split("\n").Select(x => new BluePrint(x)).ToList();
     }
 
-    [Example(expected: 33, input: "Blueprint 1: Each ore robot costs 4 ore. Each clay robot costs 2 ore. Each obsidian robot costs 3 ore and 14 clay. Each geode robot costs 2 ore and 7 obsidian.;Blueprint 2: Each ore robot costs 2 ore. Each clay robot costs 3 ore. Each obsidian robot costs 3 ore and 8 clay. Each geode robot costs 3 ore and 12 obsidian.")]
+    [Example(expected: 33, input: "Blueprint 1: Each ore robot costs 4 ore. Each clay robot costs 2 ore. Each obsidian robot costs 3 ore and 14 clay. Each geode robot costs 2 ore and 7 obsidian.\nBlueprint 2: Each ore robot costs 2 ore. Each clay robot costs 3 ore. Each obsidian robot costs 3 ore and 8 clay. Each geode robot costs 3 ore and 12 obsidian.")]
     [Puzzle(expected: 222222)]
     public static int Part1(string input)
     {
@@ -49,7 +49,7 @@ static class Day19
         return newStates;
     }
 
-    [Example(expected: 1111111, input: "Blueprint 1: Each ore robot costs 4 ore. Each clay robot costs 2 ore. Each obsidian robot costs 3 ore and 14 clay. Each geode robot costs 2 ore and 7 obsidian.;Blueprint 2: Each ore robot costs 2 ore. Each clay robot costs 3 ore. Each obsidian robot costs 3 ore and 8 clay. Each geode robot costs 3 ore and 12 obsidian.")]
+    [Example(expected: 1111111, input: "Blueprint 1: Each ore robot costs 4 ore. Each clay robot costs 2 ore. Each obsidian robot costs 3 ore and 14 clay. Each geode robot costs 2 ore and 7 obsidian.\nBlueprint 2: Each ore robot costs 2 ore. Each clay robot costs 3 ore. Each obsidian robot costs 3 ore and 8 clay. Each geode robot costs 3 ore and 12 obsidian.")]
     [Puzzle(expected: 222222)]
     public static int Part2(string input)
     {

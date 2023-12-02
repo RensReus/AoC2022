@@ -1,11 +1,11 @@
 namespace AoC2022;
 
-class Day13
+class Day13 : BaseDay
 {
     [Example(expected: 13, input: 1)]
     [Puzzle(expected: 6240)]
     public int Part1(string input)
-        => input.Split(";;").Select((pair, index) => (Compare(pair.Split(";")[0], pair.Split(";")[1]), index))
+        => input.Split("\n\n").Select((pair, index) => (Compare(pair.Split("\n")[0], pair.Split("\n")[1]), index))
             .Sum(x => x.Item1 != Outcome.Larger ? x.index + 1 : 0);
 
     public Outcome Compare(string left, string right)
@@ -75,7 +75,7 @@ class Day13
     {
         MyComparer comparer = new MyComparer();
         var extraPackets = new string[2] { "[[2]]", "[[6]]" };
-        var lines = input.Replace(";;", ";").Split(";").ToList();
+        var lines = input.Replace("\n\n", "\n").Split("\n").ToList();
         lines.AddRange(extraPackets);
         var lines2 = lines.OrderBy(x => x, comparer).ToList();
         return (lines2.IndexOf(extraPackets[0]) + 1) * (lines2.IndexOf(extraPackets[1]) + 1);

@@ -1,11 +1,11 @@
 namespace AoC2022;
 
-static class Day25
+class Day25 : BaseDay
 {
-    [Example(expected: "2=-1=0", input: "1=-0-2;12111;2=0=;21;2=01;111;20012;112;1=-1=;1-12;12;1=;122")]
+    [Example(expected: "2=-1=0", input: "1=-0-2\n12111\n2=0=\n21\n2=01\n111\n20012\n112\n1=-1=\n1-12\n12\n1=\n122")]
     [Puzzle(expected: "2-02===-21---2002==0")]
     public static string Part1(string input)
-     => ToSnafu(input.Split(";").Select(ToDecimal).Sum());
+     => ToSnafu(input.Split("\n").Select(ToDecimal).Sum());
 
     private static long ToDecimal(string x)
         => x.Reverse().Select((x, i) => (long)GetDecimalValue(x, i)).Sum();

@@ -1,10 +1,10 @@
 namespace AoC2022;
 
-class Day07
+class Day07 : BaseDay
 {
     static Dir ProcessInput(string input)
     {
-        var lines = input.Split(";").ToList().Where(x => !x.Contains("$ ls"));
+        var lines = ReadLines(input).Where(x => !x.Contains("$ ls"));
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
         var topDir = new Dir("/", null);
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.

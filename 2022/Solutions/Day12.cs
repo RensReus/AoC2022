@@ -1,15 +1,12 @@
 namespace AoC2022;
 
-class Day12
+class Day12 : BaseDay
 {
-    static IList<string> ProcessInput(string input)
-        => input.Split(";").ToList();
-
     [Example(expected: 31, input: "Sabqponm;abcryxxl;accszExk;acctuvwj;abdefghi")]
     [Puzzle(expected: 468)]
     public int Part1(string input)
     {
-        var heightMap = ProcessInput(input);
+        var heightMap = ReadLines(input);
         var start = GetPoint('S', heightMap);
         return RouteLength(heightMap, start, false);
     }
@@ -67,7 +64,7 @@ class Day12
     [Puzzle(expected: 459)]
     public int Part2(string input)
     {
-        var heightMap = ProcessInput(input);
+        var heightMap = ReadLines(input);
         var start = GetPoint('S', heightMap);
         heightMap[start.Row].Replace('S', 'a');
         var end = GetPoint('E', heightMap);

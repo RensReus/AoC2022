@@ -1,11 +1,11 @@
 namespace AoC2022;
 
-static class Day22
+class Day22 : BaseDay
 {
     static (char[,], List<Move>, int, int) ProcessInput(string input)
     {
-        var forestlines = input.Split(";;")[0].Split(";").ToList();
-        var steps = input.Split(";;")[1];
+        var forestlines = input.Split("\n\n")[0].Split("\n").ToList();
+        var steps = input.Split("\n\n")[1];
         var width = forestlines.Max(x => x.Length);
         var height = forestlines.Count;
         var forest = new char[width, height];
@@ -47,7 +47,7 @@ static class Day22
         return moves;
     }
 
-    [Example(expected: 6032, input: "        ...#;        .#..;        #...;        ....;...#.......#;........#...;..#....#....;..........#.;        ...#....;        .....#..;        .#......;        ......#.;;10R5L5R10L4R5L5")]
+    [Example(expected: 6032, input: "        ...#\n        .#..\n        #...\n        ....\n...#.......#\n........#...\n..#....#....\n..........#.\n        ...#....\n        .....#..\n        .#......\n        ......#.\n\n10R5L5R10L4R5L5")]
     [Puzzle(expected: 97356)]
     public static int Part1(string input)
     {
@@ -80,7 +80,7 @@ static class Day22
         return position.Answer();
     }
 
-    [Example(expected: 5031, input: "        ...#;        .#..;        #...;        ....;...#.......#;........#...;..#....#....;..........#.;        ...#....;        .....#..;        .#......;        ......#.;;10R5L5R10L4R5L5")]
+    [Example(expected: 5031, input: "        ...#\n        .#..\n        #...\n        ....\n...#.......#\n........#...\n..#....#....\n..........#.\n        ...#....\n        .....#..\n        .#......\n        ......#.\n\n10R5L5R10L4R5L5")]
     [Puzzle(expected: 222222)]
     public static int Part2(string input)
     {

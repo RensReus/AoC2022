@@ -1,24 +1,21 @@
 namespace AoC2022;
 
-class Day03
+class Day03 : BaseDay
 {
-    static IList<string> ProcessInput(string input)
-        => input.Split(";").ToList();
-
-    [Example(expected: 157, input: "vJrwpWtwJgWrhcsFMMfFFhFp;jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL;PmmdzqPrVvPwwTWBwg;wMqvLMZHhHMvwLHjbvcjnnSBnvTQFn;ttgJtRGJQctTZtZT;CrZsJsPPZsGzwwsLwLmpwMDw")]
+    [Example(expected: 157, input: "vJrwpWtwJgWrhcsFMMfFFhFp\njqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL\nPmmdzqPrVvPwwTWBwg\nwMqvLMZHhHMvwLHjbvcjnnSBnvTQFn\nttgJtRGJQctTZtZT\nCrZsJsPPZsGzwwsLwLmpwMDw")]
     [Puzzle(expected: 8298)]
     public int Part1(string input)
-        => ProcessInput(input)
+        => ReadLines(input)
             .Select(line => line.Substring(0, line.Length / 2)
                 .Intersect(line.Substring(line.Length / 2))
                 .First())
                 .Sum(x => x.PriorityValue());
 
-    [Example(expected: 70, input: "vJrwpWtwJgWrhcsFMMfFFhFp;jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL;PmmdzqPrVvPwwTWBwg;wMqvLMZHhHMvwLHjbvcjnnSBnvTQFn;ttgJtRGJQctTZtZT;CrZsJsPPZsGzwwsLwLmpwMDw")]
+    [Example(expected: 70, input: "vJrwpWtwJgWrhcsFMMfFFhFp\njqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL\nPmmdzqPrVvPwwTWBwg\nwMqvLMZHhHMvwLHjbvcjnnSBnvTQFn\nttgJtRGJQctTZtZT\nCrZsJsPPZsGzwwsLwLmpwMDw")]
     [Puzzle(expected: 2708)]
     public int Part2(string input)
     {
-        var processedInput = ProcessInput(input);
+        var processedInput = ReadLines(input);
         var answer = 0;
         for (int i = 0; i < processedInput.Count; i += 3)
         {

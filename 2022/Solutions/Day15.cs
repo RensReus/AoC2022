@@ -2,12 +2,12 @@ using System.Text.RegularExpressions;
 
 namespace AoC2022;
 
-static class Day15
+class Day15 : BaseDay
 {
     static (IList<string>, int) ProcessInput(string input)
     {
-        var blocks = input.Split(";;").ToList();
-        return (blocks[0].Split(";").ToList(), blocks.Count > 1 ? 10 : 2000000);
+        var blocks = input.Split("\n\n").ToList();
+        return (blocks[0].Split("\n").ToList(), blocks.Count > 1 ? 10 : 2000000);
     }
 
     [Example(expected: 26, input: 1)]

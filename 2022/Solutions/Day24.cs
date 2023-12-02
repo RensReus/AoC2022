@@ -1,10 +1,10 @@
 namespace AoC2022;
 
-static class Day24
+class Day24 : BaseDay
 {
     static (HashSet<Blizzard>, Pos, int, int) ProcessInput(string input)
     {
-        var lines = input.Split(";").ToList();
+        var lines = ReadLines(input);
         var target = new Pos(lines.Count - 2, lines.Last().IndexOf('.') - 1);
         var blizzards = new HashSet<Blizzard>();
         for (int row = 1; row < lines.Count; row++)
@@ -18,7 +18,7 @@ static class Day24
         return (blizzards, target, lines.Count - 2, lines[0].Length - 2);
     }
 
-    [Example(expected: 18, input: "#.######;#>>.<^<#;#.<..<<#;#>v.><>#;#<^v^^>#;######.#")]
+    [Example(expected: 18, input: "#.######\n#>>.<^<#\n#.<..<<#\n#>v.><>#\n#<^v^^>#\n######.#")]
     [Puzzle(expected: 232)]
     public static int Part1(string input)
     {
@@ -49,7 +49,7 @@ static class Day24
     private static HashSet<Blizzard> UpdateBlizzards(HashSet<Blizzard> blizzards, int maxRow, int maxCol)
         => blizzards.Select(bl => bl.Move(maxRow, maxCol)).ToHashSet();
 
-    [Example(expected: 54, input: "#.######;#>>.<^<#;#.<..<<#;#>v.><>#;#<^v^^>#;######.#")]
+    [Example(expected: 54, input: "#.######\n#>>.<^<#\n#.<..<<#\n#>v.><>#\n#<^v^^>#\n######.#")]
     [Puzzle(expected: 715)]
     public static int Part2(string input)
     {

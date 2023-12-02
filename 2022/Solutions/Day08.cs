@@ -1,15 +1,12 @@
 namespace AoC2022;
 
-class Day08
+class Day08 : BaseDay
 {
-    static IList<string> ProcessInput(string input)
-        => input.Split(";").ToList();
-
-    [Example(expected: 21, input: "30373;25512;65332;33549;35390")]
+    [Example(expected: 21, input: "30373\n25512\n65332\n33549\n35390")]
     [Puzzle(expected: 1776)]
     public int Part1(string input)
     {
-        var processedInput = ProcessInput(input);
+        var processedInput = ReadLines(input);
         var height = processedInput.Count();
         var width = processedInput[0].Count();
         int answer = height * 2 + width * 2 - 4; // edges minus double counted corners
@@ -26,11 +23,11 @@ class Day08
         return answer;
     }
 
-    [Example(expected: 8, input: "30373;25512;65332;33549;35390")]
+    [Example(expected: 8, input: "30373\n25512\n65332\n33549\n35390")]
     [Puzzle(expected: 234416)]
     public int Part2(string input)
     {
-        var processedInput = ProcessInput(input);
+        var processedInput = ReadLines(input);
         int answer = 0;
         for (int row = 1; row < processedInput.Count() - 1; row++)
         {

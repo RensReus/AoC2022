@@ -1,11 +1,11 @@
 namespace AoC2022;
 
-static class Day23
+class Day23 : BaseDay
 {
     static HashSet<Elf> ProcessInput(string input)
     {
         var elves = new HashSet<Elf>();
-        var lines = input.Split(";").ToList();
+        var lines = ReadLines(input);
         for (int y = 0; y < lines.Count; y++)
         {
             var line = lines[y];
@@ -17,7 +17,7 @@ static class Day23
         return elves;
     }
 
-    [Example(expected: 110, input: "....#..;..###.#;#...#.#;.#...##;#.###..;##.#.##;.#..#..")]
+    [Example(expected: 110, input: "....#..\n..###.#\n#...#.#\n.#...##\n#.###..\n##.#.##\n.#..#..")]
     [Puzzle(expected: 3766)]
     public static int Part1(string input)
     {
@@ -29,7 +29,7 @@ static class Day23
         return CalculateOpenSpaces(elves);
     }
 
-    [Example(expected: 20, input: "....#..;..###.#;#...#.#;.#...##;#.###..;##.#.##;.#..#..")]
+    [Example(expected: 20, input: "....#..\n..###.#\n#...#.#\n.#...##\n#.###..\n##.#.##\n.#..#..")]
     [Puzzle(expected: 954)]
     public static int Part2(string input)
     {

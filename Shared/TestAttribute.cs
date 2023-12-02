@@ -25,7 +25,7 @@ public abstract class TestAttribute : Attribute, ITestBuilder, IImplyFixture
 {
     internal string? Input;
     internal string? Filename;
-    internal string? NamePrefix;
+    internal string NamePrefix;
     internal object Expected;
 
     public TestAttribute(object expected, string name)
@@ -52,9 +52,12 @@ public abstract class TestAttribute : Attribute, ITestBuilder, IImplyFixture
         var year = declaringType.Namespace![3..];
 
         var path = Path.Combine(Directory.GetCurrentDirectory(), $"{year}/Inputs/{filename}.txt");
-        return File.ReadAllText(path).TrimEnd();
+        return File.ReadAllText(path).ReplaceLineEndings("\n").TrimEnd();
     }
 
     protected virtual string TestName(IMethodInfo method, string input)
-        => $"{NamePrefix} Expected: {Expected} for {input[..50]}";
+    {
+        input = input.Length <= 50 ? input : input[..50];
+        return $"{NamePrefix} Expected: {Expected} for {input}";
+    }
 }

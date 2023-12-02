@@ -1,13 +1,13 @@
 namespace AoC2022;
 
-static class Day20
+class Day20 : BaseDay
 {
-    [Example(expected: 3, input: "1;2;-3;3;-2;0;4")]
+    [Example(expected: 3, input: "1\n2\n-3\n3\n-2\n0\n4")]
     [Puzzle(expected: 15297)]
     public static long Part1(string input)
         => CalculateAnswer(input, 1, 1);
 
-    [Example(expected: 1623178306, input: "1;2;-3;3;-2;0;4")]
+    [Example(expected: 1623178306, input: "1\n2\n-3\n3\n-2\n0\n4")]
     [Puzzle(expected: 2897373276210)]
     public static long Part2(string input)
         => CalculateAnswer(input, 811589153, 10);
@@ -26,7 +26,7 @@ static class Day20
     }
 
     static List<MovedItem> ProcessInput(string input, int key)
-        => input.Split(";").Select((x, i) => new MovedItem(x, i, key)).ToList();
+        => input.Split("\n").Select((x, i) => new MovedItem(x, i, key)).ToList();
 
     private static List<MovedItem> Shuffle(List<MovedItem> items)
     {

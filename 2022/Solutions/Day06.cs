@@ -1,6 +1,6 @@
 namespace AoC2022;
 
-class Day06
+class Day06 : BaseDay
 {
     [Example(expected: 7, input: "mjqjpqmgbljsphdztnvjfqwrcgsmlb")]
     [Example(expected: 5, input: "bvwbjplbgvbhsrlpgdmjqwftvncz")]

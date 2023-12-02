@@ -1,8 +1,8 @@
 namespace AoC2022;
 
-static class Day17
+class Day17 : BaseDay
 {
-    static List<Block> Blocks => "####;;.#.;###;.#.;;..#;..#;###;;#;#;#;#;;##;##".Split(";;").Select(x => new Block(x)).ToList();
+    static List<Block> Blocks => "####\n\n.#.\n###\n.#.\n\n..#\n..#\n###\n\n#\n#\n#\n#\n\n##\n##".Split("\n\n").Select(x => new Block(x)).ToList();
 
     [Example(expected: 3068, input: ">>><<><>><<<>><>>><<<>>><<<><<<>><>><<>>")]
     [Puzzle(expected: 3141)]
@@ -90,7 +90,7 @@ internal class Block
     public Block(string input)
     {
         Shape = new HashSet<LongCoord>();
-        var inputLines = input.Split(";").Reverse().ToList();
+        var inputLines = input.Split("\n").Reverse().ToList();
         for (int y = 0; y < inputLines.Count; y++)
         {
             for (int x = 0; x < inputLines[y].Length; x++)
