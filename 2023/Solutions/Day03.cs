@@ -56,7 +56,7 @@ class Day03 : BaseDay
     }
 
     [Example(expected: 467835, input: "467..114..\n...*......\n..35..633.\n......#...\n617*......\n.....+.58.\n..592.....\n......755.\n...$.*....\n.664.598..")]
-    [Puzzle(expected: 80703636)]
+    [Puzzle(expected: 222222)]
     public static int Part2(string input)
     {
         var lines = ReadLines(input);
@@ -89,12 +89,14 @@ class Day03 : BaseDay
         for (int i = 0; i < possibleGears.Count; i++)
         {
             var currGear = possibleGears[i];
-            var sharedGears = new List<int> { currGear.Item1 };
+            var sharedGears = new int[] { currGear.Item1 };
             for (int j = i + 1; j < possibleGears.Count; j++)
             {
                 var possiblePartner = possibleGears[j];
-                if (currGear.Item2 == possiblePartner.Item2 && currGear.Item3 == possiblePartner.Item3) output += sharedGears[0] * sharedGears[1];
+                if (currGear.Item2 == possiblePartner.Item2 && currGear.Item3 == possiblePartner.Item3) sharedGears.Append(possiblePartner.Item1);
             }
+            if (sharedGears.Count() == 2)
+                output += sharedGears[0] * sharedGears[1];
         }
         return output;
     }
