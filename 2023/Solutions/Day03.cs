@@ -95,7 +95,7 @@ class Day03 : BaseDay
                 var possiblePartner = possibleGears[j];
                 if (currGear.Item2 == possiblePartner.Item2 && currGear.Item3 == possiblePartner.Item3) sharedGears.Append(possiblePartner.Item1);
             }
-            if (sharedGears.Count() == 2)
+            if (sharedGears.Length == 2)
                 output += sharedGears[0] * sharedGears[1];
         }
         return output;
