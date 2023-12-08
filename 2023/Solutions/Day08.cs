@@ -23,7 +23,7 @@ class Day08 : BaseDay
     }
 
     [Example(expected: 6, input: "LR\n\n11A = (11B, XXX)\n11B = (XXX, 11Z)\n11Z = (11B, XXX)\n22A = (22B, XXX)\n22B = (22C, 22C)\n22C = (22Z, 22Z)\n22Z = (22B, 22B)\nXXX = (XXX, XXX)")]
-    [Puzzle(expected: 222222)]
+    [Puzzle(expected: 23977527174353)]
     public static long Part2(string input)
     {
         var (steps, nodes) = ProcessInput(input);
@@ -52,10 +52,10 @@ class Day08 : BaseDay
                 }
             }
         }
-        var answer = 1L;
+        var answer = 0L;
         while (true)
         {
-            answer *= lengths.Min();
+            answer += lengths.Max();
             if (lengths.All(x => answer % x == 0)) break;
         }
         return answer;
