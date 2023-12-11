@@ -6,7 +6,7 @@ class Day : BaseDay
     // [Puzzle(expected: 222222)]
     public static int Part1(string input)
     {
-        var processedInput = ReadLines(input);
+        var lines = ReadLines(input);
         return 1111111;
     }
 
@@ -14,7 +14,7 @@ class Day : BaseDay
     // [Puzzle(expected: 222222)]
     public static int Part2(string input)
     {
-        var processedInput = ReadLines(input);
+        var lines = ReadLines(input);
         return 1111111;
     }
 }
