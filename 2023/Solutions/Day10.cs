@@ -1,7 +1,4 @@
 
-
-
-
 namespace AoC2023;
 
 class Day10 : BaseDay
@@ -12,33 +9,40 @@ class Day10 : BaseDay
     [Puzzle(expected: 6842)]
     public static int Part1(string input)
     {
-        var lines = ReadLines(input);
-        var startLine = lines.FindIndex(x => x.Contains('S'));
-        var startCol = lines[startLine].IndexOf('S');
-        var steps = 0;
-        var evaluated = new Dictionary<string, int>();
-        var toEval = new List<(int, int)> { (startLine, startCol) };
-        while (toEval.Count > 0)
-        {
-            foreach (var x in toEval)
-            {
-                evaluated.Add($"{x.Item1},{x.Item2}", steps);
-            }
-            steps++;
-            var newConnections = new List<(int, int)>();
-            foreach (var option in toEval)
-            {
-                newConnections.AddRange(Connections(option.Item1, option.Item2, lines).Where(x => !evaluated.ContainsKey($"{x.Item1},{x.Item2}")));
-            }
-            if (newConnections.Distinct().Count() != newConnections.Count) return steps;
-            toEval = newConnections;
-        }
-        return 123456789;
+        var loop = FindLoop(input);
+        return loop.Count / 2;
     }
 
-    private static List<(int, int)> Connections(int curLine, int curCol, List<string> lines)
+    public static List<(int, int)> FindLoop(string input)
     {
-        var directions = lines[curLine][curCol] switch
+        var lines = ReadLines(input);
+        var startLine = lines.FindIndex(x => x.Contains('S'));
+        var start = (startLine, lines[startLine].IndexOf('S'));
+        foreach (var loopOption in Connections(start, lines))
+        {
+            var loop = TryToFindLoop(start, loopOption, lines);
+            if (loop.Count != 0) return loop;
+        }
+        return [];
+    }
+
+    private static List<(int, int)> TryToFindLoop((int startLine, int) start, (int, int) loopOption, List<string> lines)
+    {
+        var evaluated = new List<(int, int)> { start };
+        var toEval = loopOption;
+        while (true)
+        {
+            evaluated.Add(toEval);
+            var nextOptions = Connections(toEval, lines);
+            if (nextOptions.Contains(start) && toEval != loopOption) return evaluated;
+            if (!nextOptions.Any(x => !evaluated.Contains(x))) return [];
+            toEval = nextOptions.Single(x => !evaluated.Contains(x));
+        };
+    }
+
+    private static List<(int, int)> Connections((int, int) cur, List<string> lines)
+    {
+        var directions = lines[cur.Item1][cur.Item2] switch
         {
             'S' => [(-1, 0), (1, 0), (0, 1), (0, -1)],
             '|' => [(-1, 0), (1, 0)],
@@ -51,16 +55,16 @@ class Day10 : BaseDay
         };
 
         return directions
-            .Where(x => InsideGrid(x, lines, curCol, curLine))
-            .Where(x => ValidTiles(x, lines, curCol, curLine))
-            .Select(x => (curLine + x.Item1, curCol + x.Item2)).ToList();
+            .Where(x => InsideGrid(x, lines, cur))
+            .Where(x => ValidTiles(x, lines, cur))
+            .Select(x => (cur.Item1 + x.Item1, cur.Item2 + x.Item2)).ToList();
     }
 
 
-    private static bool InsideGrid((int, int) x, List<string> lines, int curCol, int curLine)
-        => curLine + x.Item1 >= 0 && curCol + x.Item2 >= 0 && curLine + x.Item1 < lines.Count && curCol + x.Item2 < lines[0].Length;
+    private static bool InsideGrid((int, int) x, List<string> lines, (int, int) cur)
+        => cur.Item1 + x.Item1 >= 0 && cur.Item2 + x.Item2 >= 0 && cur.Item1 + x.Item1 < lines.Count && cur.Item2 + x.Item2 < lines[0].Length;
 
-    private static bool ValidTiles((int, int) x, List<string> lines, int curCol, int curLine)
+    private static bool ValidTiles((int, int) x, List<string> lines, (int, int) cur)
     {
         var validTiles = new Dictionary<(int, int), string>
         {
@@ -69,7 +73,7 @@ class Day10 : BaseDay
             {(0,-1), "-FLS"},
             {(0,1), "-J7S"},
         };
-        return validTiles[x].Contains(lines[curLine + x.Item1][curCol + x.Item2]);
+        return validTiles[x].Contains(lines[cur.Item1 + x.Item1][cur.Item2 + x.Item2]);
     }
 
     [Example(expected: 4, input: "...........\n.S-------7.\n.|F-----7|.\n.||.....||.\n.||.....||.\n.|L-7.F-J|.\n.|..|.|..|.\n.L--J.L--J.\n...........")]
@@ -78,92 +82,60 @@ class Day10 : BaseDay
     [Puzzle(expected: 393)]
     public static int Part2(string input)
     {
+        var loop = FindLoop(input);
+
+        var updatedLines = UpdateS(loop, input);
+
+        return CountInsideFields(loop, updatedLines);
+    }
+
+    private static List<string> UpdateS(List<(int, int)> loop, string input)
+    {
         var lines = ReadLines(input);
         var startLine = lines.FindIndex(x => x.Contains('S'));
-        var startCol = lines[startLine].IndexOf('S');
-        var steps = 0;
-        var evaluated = new Dictionary<string, int>();
-        var toEval = new List<(int, int)> { (startLine, startCol) };
-        var duplicate = (0, 0);
-        while (toEval.Count > 0)
+        var start = (startLine, lines[startLine].IndexOf('S'));
+
+        var neighbors = Connections(start, lines).Where(loop.Contains).ToList();
+        var sDiff = (neighbors[0].Item1 - neighbors[1].Item1, neighbors[0].Item2 - neighbors[1].Item2);
+
+        char replace;
+        if (sDiff.Item1 == 0) replace = '-';
+        else if (sDiff.Item2 == 0) replace = '|';
+
+        var eitherHigher = neighbors[0].Item1 < start.Item1 || neighbors[0].Item1 < start.Item1;
+        var eitherRight = neighbors[0].Item2 > start.Item2 || neighbors[1].Item2 > start.Item2;
+
+        replace = (eitherHigher, eitherRight) switch
         {
-            foreach (var x in toEval)
-            {
-                evaluated.Add($"{x.Item1},{x.Item2}", steps);
-            }
-            steps++;
-            var newConnections = new List<(int, int)>();
-            foreach (var option in toEval)
-            {
-                newConnections.AddRange(Connections(option.Item1, option.Item2, lines).Where(x => !evaluated.ContainsKey($"{x.Item1},{x.Item2}")));
-            }
-            if (newConnections.Distinct().Count() != newConnections.Count)
-            {
-                HashSet<(int, int)> seenElements = new();
+            (true, true) => 'L',
+            (true, false) => 'J',
+            (false, true) => 'F',
+            _ => '7'
+        };
 
-                foreach ((int, int) element in newConnections)
-                {
-                    if (!seenElements.Add(element))
-                    {
-                        duplicate = element;
-                    }
-                }
-                break;
-            }
-            toEval = newConnections;
-        }
-        toEval = [duplicate];
-
-        var loop = new List<(int, int)> { (startLine, startCol) };
-        while (toEval.Count > 0)
-        {
-            foreach (var x in toEval)
-            {
-                loop.Add((x.Item1, x.Item2));
-            }
-            var newConnections = new List<(int, int)>();
-            foreach (var option in toEval)
-            {
-                newConnections.AddRange(Connections(option.Item1, option.Item2, lines).Where(x => !loop.Contains((x.Item1, x.Item2))));
-            }
-            toEval = newConnections;
-        }
-
-        var sDiff = (loop[^1].Item1 - loop[^2].Item1, loop[^1].Item2 - loop[^2].Item2);
-        var replace = Math.Sign(sDiff.Item1) == Math.Sign(sDiff.Item2) ? '7' : 'J'; // TODO check all 4 options
-        var newline = lines[startLine].ToArray();
-        newline[startCol] = replace;
-        lines[startLine] = new string(newline);
-
-        return CountInsideFields(loop, lines);
+        var newline = lines[start.Item1].ToArray();
+        newline[start.Item2] = replace;
+        lines[start.Item1] = new string(newline);
+        return lines;
     }
 
     private static int CountInsideFields(List<(int, int)> loop, List<string> lines)
     {
-        var inside = (1, 0);
+        var insideVector = (1, 0);
         var checkedLoop = new List<(int, int)>();
         var insideFields = new List<(int, int)>();
         var nextElement = loop.Where(x => lines[x.Item1][x.Item2] == '-').OrderBy(x => x.Item1).First();
         while (true)
         {
             var loopChar = lines[nextElement.Item1][nextElement.Item2];
-            var insideNeighbour = (nextElement.Item1 + inside.Item1, nextElement.Item2 + inside.Item2);
-            if (!insideFields.Contains(insideNeighbour) && !loop.Contains(insideNeighbour))
-            {
-                insideFields.AddRange(FindInsideFields(insideNeighbour, loop));
-            }
+            insideFields.AddRange(FindInsideFields(nextElement, loop, insideVector, insideFields));
             if (!"-|".Contains(loopChar))
             {
-                inside = TransformInside(inside, loopChar);
-                // TODO dit in functie
-                insideNeighbour = (nextElement.Item1 + inside.Item1, nextElement.Item2 + inside.Item2);
-                if (!insideFields.Contains(insideNeighbour) && !loop.Contains(insideNeighbour))
-                {
-                    insideFields.AddRange(FindInsideFields(insideNeighbour, loop));
-                }
+                insideVector = TransformInside(insideVector, loopChar);
+                insideFields.AddRange(FindInsideFields(nextElement, loop, insideVector, insideFields));
             }
             checkedLoop.Add(nextElement);
-            var nextOptions = Connections(nextElement.Item1, nextElement.Item2, lines).Where(x => !checkedLoop.Contains(x));
+            var nextOptions = Connections(nextElement, lines).Where(x => !checkedLoop.Contains(x));
             if (!nextOptions.Any()) break;
             nextElement = nextOptions.First();
         }
@@ -178,9 +150,14 @@ class Day10 : BaseDay
             _ => inside
         };
 
-    private static List<(int, int)> FindInsideFields((int, int) insideNeighbour, List<(int, int)> loop)
+    private static List<(int, int)> FindInsideFields((int, int) nextElement, List<(int, int)> loop, (int, int) insideVector, List<(int, int)> insideFields)
     {
-        var insideFields = new List<(int, int)> { insideNeighbour };
+        var insideNeighbour = (nextElement.Item1 + insideVector.Item1, nextElement.Item2 + insideVector.Item2);
+        if (insideFields.Contains(insideNeighbour) || loop.Contains(insideNeighbour))
+        {
+            return [];
+        }
+        var newInsideFields = new List<(int, int)> { insideNeighbour };
         var toEval = new List<(int, int)> { insideNeighbour };
         while (toEval.Count > 0)
         {
@@ -190,15 +167,15 @@ class Day10 : BaseDay
                 foreach (var dir in new List<(int, int)> { (-1, 0), (1, 0), (0, 1), (0, -1) })
                 {
                     var newField = (field.Item1 + dir.Item1, field.Item2 + dir.Item2);
-                    if (!insideFields.Contains(newField) && !loop.Contains(newField))
+                    if (!newInsideFields.Contains(newField) && !loop.Contains(newField))
                     {
                         nextToEval.Add(newField);
-                        insideFields.Add(newField);
+                        newInsideFields.Add(newField);
                     }
                 }
             }
             toEval = nextToEval;
         }
-        return insideFields;
+        return newInsideFields;
     }
 }
