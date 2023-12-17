@@ -5,14 +5,14 @@ using NUnit.Framework.Internal.Builders;
 namespace AoC.Shared;
 
 [AttributeUsage(AttributeTargets.Method)]
-public class PuzzleAttribute : TestAttribute
+public class PuzzleAttribute : AocTestAttribute
 {
     public PuzzleAttribute(object expected, bool part2 = false) : base(expected, "Puzzle")
         => Filename = part2 ? "_2" : "";
 }
 
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
-public class ExampleAttribute : TestAttribute
+public class ExampleAttribute : AocTestAttribute
 {
     public ExampleAttribute(object expected, string input) : base(expected, "Example")
         => Input = input;
@@ -21,14 +21,14 @@ public class ExampleAttribute : TestAttribute
         => Filename = $"_Example_{input}";
 }
 
-public abstract class TestAttribute : Attribute, ITestBuilder, IImplyFixture
+public abstract class AocTestAttribute : Attribute, ITestBuilder, IImplyFixture
 {
     internal string? Input;
     internal string? Filename;
     internal string NamePrefix;
     internal object Expected;
 
-    public TestAttribute(object expected, string name)
+    public AocTestAttribute(object expected, string name)
     {
         Expected = expected;
         NamePrefix = name;

@@ -1,4 +1,3 @@
-
 namespace AoC2023;
 
 class Day16 : BaseDay
@@ -6,22 +5,22 @@ class Day16 : BaseDay
     [Example(expected: 46, 1)]
     [Puzzle(expected: 7939)]
     public static int Part1(string input)
-        => CountVisited(input, ((0, 0), (0, 1)));
+        => CountVisited(input, new(new(0, 0), new(0, 1)));
 
-    private static int CountVisited(string input, ((int, int), (int, int)) initial)
+    private static int CountVisited(string input, PointWithDirection initial)
     {
         var lines = ReadLines(input);
-        var stepsToEval = new List<((int, int), (int, int))> { initial };
-        var visited = new List<((int, int), (int, int))> { initial };
+        var stepsToEval = new List<PointWithDirection> { initial };
+        var visited = new List<PointWithDirection> { initial };
         while (stepsToEval.Count > 0)
         {
-            var newSteps = new List<((int, int), (int, int))>();
+            var newSteps = new List<PointWithDirection>();
             foreach (var step in stepsToEval)
             {
-                var next = NextSteps(step.Item1, step.Item2, lines);
+                var next = NextSteps(step, lines);
                 foreach (var item in next)
                 {
-                    if (!visited.Contains(item) && !newSteps.Contains(item) && InBounds(lines, item.Item1))
+                    if (!visited.Contains(item) && !newSteps.Contains(item) && item.Position.InBounds(lines.Count, lines[0].Length))
                     {
                         visited.Add(item);
                         newSteps.Add(item);
@@ -30,35 +29,32 @@ class Day16 : BaseDay
             }
             stepsToEval = newSteps;
         }
-
-        return visited.Select(x => x.Item1).Distinct().Count();
+        return visited.Select(x => x.Position).Distinct().Count();
     }
 
-    private static bool InBounds(List<string> lines, (int, int) pos)
-        => pos.Item1 >= 0 && pos.Item1 < lines.Count && pos.Item2 >= 0 && pos.Item2 < lines[0].Length;
-
-    private static List<((int, int), (int, int))> NextSteps((int, int) pos, (int, int) dir, List<string> lines)
+    private static List<PointWithDirection> NextSteps(PointWithDirection ray, List<string> lines)
     {
-        var cell = lines[pos.Item1][pos.Item2];
-        if (ShouldSplit(dir, cell)) return SplitRays(pos, dir);
-        dir = UpdateDir(dir, cell);
-        pos = (pos.Item1 + dir.Item1, pos.Item2 + dir.Item2);
-        return [(pos, dir)];
+        var cell = lines[ray.Position.Row][ray.Position.Col];
+        if (ShouldSplit(ray.Direction, cell)) return SplitRays(ray);
+        ray = new(ray.Position, UpdateDir(ray.Direction, cell));     // ook iets voor in extention 
+        return [ray.Move()];
     }
 
-    private static (int, int) UpdateDir((int, int) dir, char cell)
+    private static Vec2D UpdateDir(Vec2D dir, char cell)
         => cell switch
         {
-            '\\' => (dir.Item2, dir.Item1),
-            '/' => (-dir.Item2, -dir.Item1),
+            '\\' => dir.ReflectPositive(),
+            '/' => dir.ReflectNegative(),
             _ => dir
         };
 
-    private static List<((int, int), (int, int))> SplitRays((int, int) pos, (int, int) dir)
-        => [(pos, (dir.Item2, dir.Item1)), (pos, (-dir.Item2, -dir.Item1))];
+    private static List<PointWithDirection> SplitRays(PointWithDirection ray)
+        => [
+            new(ray.Position, ray.Direction.ReflectPositive()),
+            new(ray.Position, ray.Direction.ReflectNegative())];
 
-    private static bool ShouldSplit((int, int) dir, char cell)
-        => (cell == '-' && dir.Item1 != 0) || (cell == '|' && dir.Item2 != 0);
+    private static bool ShouldSplit(Vec2D dir, char cell)
+        => (cell == '-' && dir.Row != 0) || (cell == '|' && dir.Col != 0);
 
     [Example(expected: 51, 1)]
     [Puzzle(expected: 8318)]
@@ -68,14 +64,41 @@ class Day16 : BaseDay
         var max = 0;
         for (int i = 0; i < lines[0].Length; i++)
         {
-            max = int.Max(max, CountVisited(input, ((0, i), (1, 0))));
-            max = int.Max(max, CountVisited(input, ((lines.Count - 1, i), (-1, 0))));
+            max = int.Max(max, CountVisited(input, new(new(0, i), new(1, 0))));
+            max = int.Max(max, CountVisited(input, new(new(lines.Count - 1, i), new(-1, 0))));
         }
         for (int i = 0; i < lines.Count; i++)
         {
-            max = int.Max(max, CountVisited(input, ((i, 0), (0, 1))));
-            max = int.Max(max, CountVisited(input, ((i, lines[0].Length - 1), (0, -1))));
+            max = int.Max(max, CountVisited(input, new(new(i, 0), new(0, 1))));
+            max = int.Max(max, CountVisited(input, new(new(i, lines[0].Length - 1), new(0, -1))));
         }
         return max;
+    }
+
+    private readonly struct Vec2D(int x, int y)
+    {
+        public int Row { get; } = x;
+        public int Col { get; } = y;
+
+        public bool InBounds(int rowMax, int colMax, int rowMin = 0, int colMin = 0)
+            => Row >= rowMin && Row < rowMax && Col >= colMin && Col < colMax;
+
+        public static Vec2D operator +(Vec2D left, Vec2D right)
+            => new(left.Row + right.Row, left.Col + right.Col);
+
+        public static Vec2D operator -(Vec2D left, Vec2D right)
+            => new(left.Row - right.Row, left.Col - right.Col);
+
+        public Vec2D ReflectPositive() // TODO deze twee toch in pointwithdirection en misschien in extension class of zo
+            => new(Col, Row);
+
+        public Vec2D ReflectNegative()
+            => new(-Col, -Row);
+    }
+
+    private record PointWithDirection(Vec2D Position, Vec2D Direction)
+    {
+        public PointWithDirection Move()
+            => new(Position + Direction, Direction);
     }
 }
