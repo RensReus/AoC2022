@@ -49,6 +49,17 @@ public static class SpeedTest
     }
 
     [Test]
+    public static void ComplexTest()
+    {
+        var a = new Complex(1, 1);
+        var b = new Complex(1, 1);
+        for (int i = 0; i < 1e8; i++)
+        {
+            a += b;
+        }
+    }
+
+    [Test]
     public static void VectorTest()
     {
         var a = new Vector2(1, 1);
@@ -107,11 +118,8 @@ public static class SpeedTest
             => new(left.Row - right.Row, left.Col - right.Col);
     }
 
-    private readonly struct Record(int x, int y)
+    private record Record(int Row, int Col)
     {
-        public int Row { get; } = x;
-        public int Col { get; } = y;
-
         public static Record operator +(Record left, Record right)
             => new(left.Row + right.Row, left.Col + right.Col);
 
@@ -119,7 +127,7 @@ public static class SpeedTest
             => new(left.Row - right.Row, left.Col - right.Col);
     }
 
-    private readonly struct Class(int x, int y)
+    private class Class(int x, int y)
     {
         public int Row { get; } = x;
         public int Col { get; } = y;
