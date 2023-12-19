@@ -77,88 +77,69 @@ class Day18 : BaseDay
         };
 
     [Example(expected: 952408144115, input: "R 6 (#70c710)\nD 5 (#0dc571)\nL 2 (#5713f0)\nD 2 (#d2c081)\nR 2 (#59c680)\nD 2 (#411b91)\nL 5 (#8ceee2)\nU 2 (#caa173)\nL 1 (#1b58a2)\nU 2 (#caa171)\nR 2 (#7807d2)\nU 3 (#a77fa3)\nL 2 (#015232)\nU 2 (#7a21e3)")]
-    [Example(expected: 179300, input: "R 155\nD 1000\nL 200\nU 540\nR 45\nU 460")]
-    [Puzzle(expected: 119114864896236)] // Too low
+    [Puzzle(expected: 127844509405501)]
     public static long Part2(string input)
     {
         var steps = ReadLines(input).Select(ConvertInstruction);
-        //var steps = ReadLines(input).Select(x => x.Split(' '));
         var pos = (0L, 0L);
-        var originalCorners = new Dictionary<(long, long), bool> { { pos, true } };
+        var originalCorners = new List<(long, long)> { pos };
         foreach (var step in steps)
         {
             var dir = GetDir(step[0], long.Parse(step[1]));
             pos = (pos.Item1 + dir.Item1, pos.Item2 + dir.Item2);
-            originalCorners[pos] = true;
+            originalCorners.Add(pos);
         }
         var corners = new Dictionary<(long, long), bool>();
 
-        var allRow = originalCorners.Keys.Select(x => x.Item1).Distinct().Order().ToList();
-        var allCol = originalCorners.Keys.Select(x => x.Item2).Distinct().Order().ToList();
-        foreach (var row in allRow)
+        var allRow = originalCorners.Select(x => x.Item1).Distinct().Order().ToList();
+        var allCol = originalCorners.Select(x => x.Item2).Distinct().Order().ToList();
+
+        var verticalLines = new List<((long, long), long)>();
+        for (int i = 0; i < originalCorners.Count - 1; i++)
         {
-            foreach (var col in allCol)
+            var a = originalCorners[i];
+            var b = originalCorners[i + 1];
+            var rowRange = (long.Min(a.Item1, b.Item1), long.Max(a.Item1, b.Item1));
+            if (b.Item2 == a.Item2) verticalLines.Add((rowRange, a.Item2));
+        }
+        var a2 = originalCorners[0];
+        var b2 = originalCorners[^1];
+        var rowRange2 = (long.Min(a2.Item1, b2.Item1), long.Max(a2.Item1, b2.Item1));
+        if (b2.Item2 == a2.Item2) verticalLines.Add((rowRange2, a2.Item2));
+        verticalLines = verticalLines.OrderBy(x => x.Item2).ToList();
+        var totalSize = 0L;
+        for (int i = 0; i < allRow.Count - 1; i++)
+        {
+            var row = allRow[i];
+            var rowDiff = allRow[i + 1] - row;
+            for (int j = 0; j < allCol.Count - 1; j++)
             {
-                corners[(row, col)] = true;
+                var (col1, col2) = (allCol[j], allCol[j + 1]);
+
+                if (InsideLoop(row + 1L, col1 + 1L, allCol, verticalLines)) totalSize += (col2 - col1) * rowDiff;
             }
         }
-        var totalSize = 0L;
-        foreach (var corner in corners.Keys)
-        {
-            var curRow = allRow.IndexOf(corner.Item1);
-            var curCol = allCol.IndexOf(corner.Item2);
-            var size = 0L;
-            if (curRow == allRow.Count - 1 || curCol == allCol.Count - 1) continue;
 
-            size = (allRow[curRow + 1] - corner.Item1) * (allCol[curCol + 1] - corner.Item2);
-            if (InsideLoop(corner.Item1 + 208, corner.Item2 + 15, allRow, allCol, originalCorners)) totalSize += size;
-        }
-
-        return totalSize + RightDownRemainder(steps);
+        return totalSize + RightDownRemainder(steps) + 1;
     }
 
-    private static bool InsideLoop(long row, long col, List<long> allRow, List<long> allCol, Dictionary<(long, long), bool> originalCorners)
+    private static bool InsideLoop(long row, long col, List<long> allCol, IEnumerable<((long, long), long)> verticalLines)
     {
         var inside = false;
-        var rowIndex = allRow.FindIndex(0, x => x > row);
-        var colIndex = allCol.FindIndex(0, x => x > col);
-        while (row < allRow.Last() && col < allCol.Last())
+        foreach (var col2 in allCol.Where(c => c < col))
         {
-            var rowDelta = allRow[rowIndex] - row;
-            var colDelta = allCol[colIndex] - col;
-            if (rowDelta < colDelta)
-            {
-                row += rowDelta;
-                col += rowDelta;
-                rowIndex++;
-                var corners = originalCorners.Keys.Where(x => x.Item1 == row).Select(x => x.Item2);
-                var corners2 = originalCorners.Keys.Where(x => x.Item1 == row);
-                if (corners.Count() % 2 != 0) throw new Exception("oneven matches");
-                if (col > corners.Min() && col < corners.Max()) inside = !inside;
-            }
-            else if (rowDelta > colDelta)
-            {
-                row += colDelta;
-                col += colDelta;
-                colIndex++;
-                var corners = originalCorners.Keys.Where(x => x.Item2 == col).Select(x => x.Item1);
-                var corners2 = originalCorners.Keys.Where(x => x.Item2 == col);
-                if (row > corners.Min() && row < corners.Max()) inside = !inside;
-                if (corners.Count() % 2 != 0) throw new Exception("oneven matches");
-            }
-            else
-            {
-                if (colIndex == 0 || colIndex == allCol.Count - 1 || rowIndex == 0 || rowIndex == allRow.Count - 1)
-                    throw new Exception("hopelijk komt dit niet voor");
-                row += colDelta;
-                col += colDelta;
-                colIndex++;
-                rowIndex++;
-                var corners = originalCorners.Keys.Where(x => x.Item1 == row).Select(x => x.Item2);
-                if (corners.Count() % 2 != 0) throw new Exception("oneven matches");
-            }
+            if (OnLoop(row, col2, verticalLines)) inside = !inside;
         }
         return inside;
+    }
+
+    private static bool OnLoop(long row, long col, IEnumerable<((long, long), long)> verticalLines)
+    {
+        foreach (var line in verticalLines)
+        {
+            if (line.Item2 == col && row > line.Item1.Item1 && row < line.Item1.Item2) return true;
+        }
+        return false;
     }
 
     private static long RightDownRemainder(IEnumerable<string[]> steps)
