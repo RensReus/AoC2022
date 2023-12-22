@@ -7,7 +7,7 @@ class Day20 : BaseDay
 {
     [Example(expected: 32000000, input: "broadcaster -> a, b, c\n%a -> b\n%b -> c\n%c -> inv\n&inv -> a")]
     [Example(expected: 11687500, input: "broadcaster -> a\n%a -> inv, con\n&inv -> b\n%b -> con\n&con -> output")]
-    [Puzzle(expected: 222222)]
+    [Puzzle(expected: 841763884)]
     public static long Part1(string input)
     {
         var nodes = ReadLines(input).Select(line => new Node(line)).ToDictionary(x => x.Name, x => x);
@@ -58,7 +58,8 @@ class Day20 : BaseDay
         }
         for (int i = 0; i < 100; i++)
         {
-            LogState(nodes);
+            // LogState(nodes);
+            var pulseCount = 0;
             if (nodes["jm"].RememberedSignals.Values.Any(x => x))
             {
                 Console.WriteLine(i);
@@ -71,6 +72,7 @@ class Day20 : BaseDay
             }
             while (pulsesToEval.Count != 0)
             {
+                pulseCount++;
                 var pulse = pulsesToEval.Dequeue();
                 if (pulse.Item2 == "rx" && !pulse.Item3) return i;
                 if (!nodes.TryGetValue(pulse.Item2, out Node? node)) continue;
@@ -80,6 +82,7 @@ class Day20 : BaseDay
                     pulsesToEval.Enqueue(newPulse);
                 }
             }
+            Console.WriteLine(pulseCount);
         }
         return 1;
     }
