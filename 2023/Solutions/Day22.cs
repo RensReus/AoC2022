@@ -47,10 +47,8 @@ class Day22 : BaseDay
         var blocks = ReadLines(input).Select(x => new Block(x)).OrderBy(x => x.Start[2]).ToList();
         var occupiedCoords = new Dictionary<(int, int, int), int>();
         var blockSupports = new Dictionary<int, List<int>>();
-        var blockSupports2 = new Dictionary<int, List<int>>();
         for (int i = 0; i < blocks.Count; i++)
         {
-            blockSupports2[i] = [];
             var block = blocks[i];
             while (true)
             {
@@ -77,26 +75,17 @@ class Day22 : BaseDay
             }
         }
 
-        foreach (var blockSupport in blockSupports)
-        {
-            foreach (var support in blockSupport.Value)
-            {
-                if (support == -1) continue; 
-                blockSupports2[support].Add(blockSupport.Key);
-            }
-        }
-
         var answer = 0;
-        foreach (var blockSupport in blockSupports2)
+        for (int i = 0; i < blocks.Count; i++)
         {
-            answer += TotalCrashingDown(blockSupport, blockSupports);
+            answer += TotalCrashingDown(i, blockSupports);
         }
         return answer;
     }
 
-    private static int TotalCrashingDown(KeyValuePair<int, List<int>> blockSupport, Dictionary<int, List<int>> blockSupports)
+    private static int TotalCrashingDown(int initialRemove, Dictionary<int, List<int>> blockSupports)
     {
-        var supportsRemoved = new List<int> { blockSupport.Key };
+        var supportsRemoved = new List<int> { initialRemove };
         var shouldContinue = true;
         while (shouldContinue)
         {
@@ -127,10 +116,6 @@ class Day22 : BaseDay
             var copy = (Block)MemberwiseClone();
             copy.Start[2]--;
             copy.End[2]--;
-            if (copy.Start[2] < 1)
-            {
-                var a = 1;
-            }
             return copy;
         }
 
