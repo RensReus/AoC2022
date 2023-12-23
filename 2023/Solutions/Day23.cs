@@ -1,6 +1,3 @@
-
-
-
 namespace AoC2023;
 
 class Day23 : BaseDay
