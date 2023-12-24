@@ -33,7 +33,7 @@ class Day20 : BaseDay
                 var pulse = pulsesToEval.Dequeue();
                 if (pulse.Item3) highPulses++;
                 else lowPulses++;
-                if (!nodes.TryGetValue(pulse.Item2, out Node node)) continue;
+                if (!nodes.TryGetValue(pulse.Item2, out Node? node)) continue;
                 var nextPulses = node.ProcessSignal(pulse);
                 foreach (var newPulse in nextPulses)
                 {
