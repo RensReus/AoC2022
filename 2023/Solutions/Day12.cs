@@ -34,17 +34,11 @@ class Day12 : BaseDay
         if (!sections.Contains('?') || flex == 0) return 1;
 
 
-        // for each
-        // try position
-        // check validity (dit is een diepe recursieve optie) maar misschien gewoon dat doen en kijken of die 0 of meer opties geeft
-        // if has single possible spot use to split
-        // 
+        var startPossible = 0;
         for (int i = 0; i < groups.Count; i++)
         {
             var group = groups[i];
-            var prev = groups.Take(i);
             var certainSpots = group - flex;
-            var startPossible = prev.Sum() + i;
             if (certainSpots > 0)
             {
                 var startCertain = startPossible + group - certainSpots;
@@ -53,14 +47,14 @@ class Day12 : BaseDay
                     sections[startCertain + j] = '#';
                 }
             }
-
-            var overig = groups.Skip(i + 1);
-            var endPossible = overig.Count() + overig.Sum();
-            // validity check dmv splitten?
-            for (int j = 0; j < endPossible; j++)
+            var potentialSpots = 0;
+            for (int j = startPossible; j < startPossible + flex; j++)
             {
-                // 
+                if (!".?".Contains(sections[j]) || !".?".Contains(sections[j])) continue;
+                // check if uberhaupt past
+                // check if simple invalid
             }
+            if (potentialSpots == 1) ;
             // exit condition if fully placed group
         }
         // sections begint altijd met ? of #
