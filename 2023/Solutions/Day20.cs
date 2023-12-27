@@ -1,6 +1,3 @@
-
-using AoC2022;
-
 namespace AoC2023;
 
 class Day20 : BaseDay
@@ -56,9 +53,10 @@ class Day20 : BaseDay
                 if (nodes.TryGetValue(output, out Node? value) && value.Type == '&') value.RememberedSignals[node.Key] = false;
             }
         }
-        for (int i = 0; i < 100; i++)
+        // var prevstate = StateString(nodes);
+        // FindEffectiveOutput(nodes);
+        for (int i = 0; i < 0; i++)
         {
-            // LogState(nodes);
             var pulseCount = 0;
             if (nodes["jm"].RememberedSignals.Values.Any(x => x))
             {
@@ -82,9 +80,65 @@ class Day20 : BaseDay
                     pulsesToEval.Enqueue(newPulse);
                 }
             }
-            Console.WriteLine(pulseCount);
+            // Console.WriteLine(pulseCount);
+
+            var state = StateString(nodes);
+            // LogStateDiff(state, prevstate);
+            // prevstate = state;
+            // LogState(nodes);
         }
         return 1;
+    }
+
+    private static void FindEffectiveOutput(Dictionary<string, Node> nodes, string start)
+    {
+        var shouldBeInLoop = nodes.Where(x => x.Value.Outputs.Contains(start) && x.Key != "roadcaster").Select(x => x.Key).ToHashSet();
+        var nettoOutput = start;
+        var toEval = new Queue<string>();
+        var visited = new List<string> { start };
+        foreach (var n in nodes[start].Outputs)
+        {
+            toEval.Enqueue(n);
+        }
+        // ik moet alles wat nog niet geloopt is als potentiele exit bij houden
+        // bij 1to1 kan een potentiele exit door schuiven
+        // start is een hele tijd potentiele exit tot dat qq (en de andere start in en outputs) is afgerond
+        // daarna gaan we door en komen we op jm en dat is een potentiele exit die we niet kunnen afronden dus dan is de stap er voor nog de exit
+
+        while (toEval.Count > 1)
+        {
+            var next = toEval.Dequeue();
+            visited.Add(next);
+            if (nodes[next].Type == '&')
+            {
+                foreach (var item in nodes[next].RememberedSignals.Keys)
+                {
+                    shouldBeInLoop.Add(item);
+                }
+            }
+            foreach (var item in nodes[next].RememberedSignals.Keys.Where(x => !visited.Contains(x) && !toEval.Contains(x)))
+            {
+                toEval.Enqueue(item);
+            }
+        }
+
+        foreach (var node in nodes)
+        {
+            foreach (var output in node.Value.Outputs)
+            {
+                Console.WriteLine($"{node.Value.Name} --> {output}");
+            }
+        }
+    }
+
+    private static void LogStateDiff(object state, object prevstate)
+    {
+        throw new NotImplementedException();
+    }
+
+    private static object StateString(Dictionary<string, Node> nodes)
+    {
+        throw new NotImplementedException();
     }
 
     private static void LogState(Dictionary<string, Node> nodes)
