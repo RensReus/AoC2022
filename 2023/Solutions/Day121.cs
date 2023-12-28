@@ -7,19 +7,21 @@ class Day121 : BaseDay
     public static int Part1(string input)
     {
         var answer = 0;
+        var output = new List<(int, long, string)>();
         foreach (var item in ReadLines(input))
         {
             // log timing
             var start = DateTime.Now;
             var count = CalculatePermutations(item);
             var diff = DateTime.Now.Millisecond - start.Millisecond;
-            if (diff > 50)
-            {
-                Console.WriteLine(item);
-                Console.WriteLine(count);
-                Console.WriteLine(DateTime.Now.Millisecond - start.Millisecond);
-            }
+            output.Add((diff, count, item));
             answer += count;
+        }
+
+        foreach (var item in output)
+        {
+            Console.WriteLine(item.Item2 + " " + item.Item3);
+            // Console.WriteLine(item);
         }
         return answer;
     }
