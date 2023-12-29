@@ -14,8 +14,8 @@ class Day21 : BaseDay
 
     private static long CountPossibleFields(int startRow, int startCol, List<string> lines, int limit, bool even)
     {
-        var visitedEven = new Dictionary<(int, int), bool>();
-        var visitedOdd = new Dictionary<(int, int), bool>();
+        var visitedEven = new HashSet<(int, int)>();
+        var visitedOdd = new HashSet<(int, int)>();
         var toEval = new List<(int, int)> { (startRow, startCol) };
         var size = lines.Count;
         for (long i = 1; i <= limit; i++)
@@ -26,14 +26,14 @@ class Day21 : BaseDay
                 foreach (var n in GetNeighbours(item))
                 {
                     if (n.Item1 < 0 || n.Item1 >= size || n.Item2 < 0 || n.Item2 >= size || lines[n.Item1][n.Item2] == '#') continue;
-                    if (i % 2 == 0 && !visitedEven.ContainsKey(n))
+                    if (i % 2 == 0 && !visitedEven.Contains(n))
                     {
-                        visitedEven[n] = true;
+                        visitedEven.Add(n);
                         nextToEval.Add(n);
                     }
-                    if (i % 2 != 0 && !visitedOdd.ContainsKey(n))
+                    if (i % 2 != 0 && !visitedOdd.Contains(n))
                     {
-                        visitedOdd[n] = true;
+                        visitedOdd.Add(n);
                         nextToEval.Add(n);
                     }
                 }
