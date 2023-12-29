@@ -23,30 +23,23 @@ class Day19 : BaseDay
         var start = DateTime.Now;
         for (int minute = 1; minute < maxMinutes; minute++)
         {
-            if ((DateTime.Now - start).TotalSeconds > 30)
+            if ((DateTime.Now - start).TotalSeconds > 120)
             {
                 Console.WriteLine("TIME TIME TIME");
                 break;
             }
-            if (currStates.Count > 1_000_000 && minute != maxMinutes - 1)
+            if (currStates.Count > 1_000_000 && minute < maxMinutes - 2)
             {
                 Console.WriteLine($"{minute}, {currStates.Count}");
                 Console.WriteLine("COUNT COUNT COUNT");
                 break;
             }
-
-            //if (currStates.Count > 10)
-            //{
-            //    Console.WriteLine($"{minute}, {nextStates.Count}");
-
-            //}
             foreach (var state in currStates)
             {
                 var n = GetNextStates(state, bluePrint);
                 nextStates.UnionWith(n);
             }
-
-            currStates = Filter(nextStates);
+            currStates = nextStates.Count < 10_000 ? Filter(nextStates) : nextStates;
             nextStates = [];
         }
         currStates = currStates.Select(state => state.IncrementResources()).ToHashSet();
@@ -91,7 +84,7 @@ class Day19 : BaseDay
     }
 
     [Example(expected: 3472, input: "Blueprint 1: Each ore robot costs 4 ore. Each clay robot costs 2 ore. Each obsidian robot costs 3 ore and 14 clay. Each geode robot costs 2 ore and 7 obsidian.\nBlueprint 2: Each ore robot costs 2 ore. Each clay robot costs 3 ore. Each obsidian robot costs 3 ore and 8 clay. Each geode robot costs 3 ore and 12 obsidian.")]
-    [Puzzle(expected: 222222)]
+    [Puzzle(expected: 3003)]
     public static int Part2(string input)
     {
         var bluePrints = ProcessInput(input);
@@ -168,26 +161,21 @@ internal class BPState
     // huidige productie / recipe -> x bots per turn
     private bool NeedsOreBot(BluePrint bluePrint)
     {
-        return Robots["ore"] < bluePrint.MaxOreBots;
+        return Robots["ore"] < bluePrint.MaxOreBots && Resources["ore"] < bluePrint.MaxOreBots * 2;
     }
 
     private bool NeedsClayBot(BluePrint bluePrint)
     {
         // hebben we het punt bereikt dat we alleen nog maar obsidian/geode bots gaan maken
         // gaat ie sneller obsidian bot halen
-        return Robots["clay"] < bluePrint.MaxClayBots;
+        return Robots["clay"] < bluePrint.MaxClayBots && Resources["clay"] < bluePrint.MaxClayBots * 2;
     }
 
     private bool NeedsObsidianBot(BluePrint bluePrint)
     {
         // gaat ie sneller geode bot halen
         // hebben we het punt bereikt dat we alleen nog maar geode bots gaan maken
-        return Robots["obsidian"] < bluePrint.MaxObsidianBots;
-    }
-
-    internal bool ShouldBuildNothing(BluePrint bluePrint)
-    {
-        return !EnoughResources(bluePrint.RobotCosts["geode"]);
+        return Robots["obsidian"] < bluePrint.MaxObsidianBots && Resources["obsidian"] < bluePrint.MaxObsidianBots * 2;
     }
 
     public override string ToString()
