@@ -58,17 +58,17 @@ class Day21 : BaseDay
         var gridwidth = lines.Count;
         int totalGridSteps = targetSteps / gridwidth;
         int remainingSteps = targetSteps % gridwidth;
-        var totalEvenGrids = 1L;
-        var totalOddGrids = 0L;
+        var totalOddGrids = 1L;
+        var totalEvenGrids = 0L;
         for (int i = 0; i < totalGridSteps; i++) // Kan wss met formule
         {
-            if (i % 2 == 0) totalEvenGrids += i * 4;
-            else totalOddGrids += i * 4;
+            if (i % 2 == 0) totalOddGrids += i * 4;
+            else totalEvenGrids += i * 4;
         }
-        var visitableInEvenGrid = CountPossibleFields(startRow, startCol, lines, gridwidth, false);
-        var visitableInOddGrid = CountPossibleFields(startRow, startCol, lines, gridwidth, true);
+        var visitableInOddGrid = CountPossibleFields(startRow, startCol, lines, gridwidth, false);
+        var visitableInEvenGrid = CountPossibleFields(startRow, startCol, lines, gridwidth, true);
 
-        var countCompletedGrids = visitableInEvenGrid * totalEvenGrids + visitableInOddGrid * totalOddGrids;
+        var countCompletedGrids = visitableInOddGrid * totalOddGrids + visitableInEvenGrid * totalEvenGrids;
 
         return countCompletedGrids
             + StraightBonus(remainingSteps, totalGridSteps % 2 == 0, startRow, startCol, lines, gridwidth)
@@ -76,9 +76,9 @@ class Day21 : BaseDay
     }
 
     private static long DiagonalBonus(int gridwidth, List<string> lines, int remainingSteps, int totalGridSteps)
-        => DiagonalBonusEven(gridwidth, lines, remainingSteps - 1, totalGridSteps) + DiagonalBonusOdd(gridwidth, lines, remainingSteps, totalGridSteps);
+        => DiagonalBonusOdd(gridwidth, lines, remainingSteps - 1, totalGridSteps) + DiagonalBonusEven(gridwidth, lines, remainingSteps, totalGridSteps);
 
-    private static long DiagonalBonusOdd(int gridwidth, List<string> lines, int remainingSteps, int totalGridSteps)
+    private static long DiagonalBonusEven(int gridwidth, List<string> lines, int remainingSteps, int totalGridSteps)
     {
         var evenGridSteps = totalGridSteps % 2 == 0;
         var bonusSteps = !evenGridSteps ? gridwidth : 0;
@@ -93,7 +93,7 @@ class Day21 : BaseDay
         return (topRight + topLeft + bottomLeft + bottomRight) * oddDiagonalCount;
     }
 
-    private static long DiagonalBonusEven(int gridwidth, List<string> lines, int remainingSteps, int totalGridSteps)
+    private static long DiagonalBonusOdd(int gridwidth, List<string> lines, int remainingSteps, int totalGridSteps)
     {
         var evenGridSteps = totalGridSteps % 2 == 0;
         var bonusSteps = evenGridSteps ? gridwidth : 0;
@@ -107,15 +107,15 @@ class Day21 : BaseDay
         return (topRight + topLeft + bottomLeft + bottomRight) * evenDiagonalCount;
     }
 
-    private static long StraightBonus(int remainingSteps, bool isEven, int startRow, int startCol, List<string> lines, int gridwidth)
+    private static long StraightBonus(int remainingSteps, bool evenGridSteps, int startRow, int startCol, List<string> lines, int gridwidth)
     {
         var hoeveelsnellerEigenlijk = gridwidth / 2;
         var actualRemainingSteps = remainingSteps + hoeveelsnellerEigenlijk;
         if (actualRemainingSteps >= gridwidth) throw new Exception("moet nog een 4 extra grids meepakken");
-        var leftBonus = CountPossibleFields(startRow, 0, lines, actualRemainingSteps, isEven);
-        var rightBonus = CountPossibleFields(startRow, gridwidth - 1, lines, actualRemainingSteps, isEven);
-        var topBonus = CountPossibleFields(0, startCol, lines, actualRemainingSteps, isEven);
-        var bottomBonus = CountPossibleFields(gridwidth - 1, startCol, lines, actualRemainingSteps, isEven);
+        var leftBonus = CountPossibleFields(startRow, 0, lines, actualRemainingSteps, evenGridSteps);
+        var rightBonus = CountPossibleFields(startRow, gridwidth - 1, lines, actualRemainingSteps, evenGridSteps);
+        var topBonus = CountPossibleFields(0, startCol, lines, actualRemainingSteps, evenGridSteps);
+        var bottomBonus = CountPossibleFields(gridwidth - 1, startCol, lines, actualRemainingSteps, evenGridSteps);
 
         return leftBonus + rightBonus + topBonus + bottomBonus;
     }
