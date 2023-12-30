@@ -163,7 +163,8 @@ internal class Position2
             ( >= 100 and < 150, -1) => (49 - newRow + 100, 50, Direction.East),
             (99, >= 0 and < 50) => (newCol + 50, 50, Direction.East),
             ( >= 50 and < 100, 49) => (100, newRow - 50, Direction.South),
-            ( >= 0 and < 50, 49) => (149 - newRow, 0, Direction.East)
+            ( >= 0 and < 50, 49) => (149 - newRow, 0, Direction.East),
+            _ => throw new Exception()
         };
     }
 }
