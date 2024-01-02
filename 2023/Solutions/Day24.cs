@@ -1,6 +1,8 @@
 
 
 
+using System.Numerics;
+
 namespace AoC2023;
 
 class Day24 : BaseDay
@@ -22,8 +24,6 @@ class Day24 : BaseDay
 
     private static (decimal, decimal, bool) Intersection(Hailstone one, Hailstone two)
     {
-        //long minArea = 7;
-        //long maxArea = 27;
         long minArea = 200000000000000;
         long maxArea = 400000000000000;
         var a1 = one.Dy / one.Dx;
@@ -36,46 +36,81 @@ class Day24 : BaseDay
         return (xIntersect, yIntersect, inFuture && inArea);
     }
 
-    [Example(expected: 2, input: "19, 13, 30 @ -2,  1, -2\n18, 19, 22 @ -1, -1, -2\n20, 25, 34 @ -2, -2, -4\n12, 31, 28 @ -1, -2, -1\n20, 19, 15 @  1, -5, -3")]
-    [Puzzle(expected: 222222)]
+    [Puzzle(expected: 652666650475950)]
     public static long Part2(string input)
     {
         var hailstones = ReadLines(input).Select(x => new Hailstone(x)).ToList();
-        var lowlim = long.MinValue;
-        var uplim = long.MaxValue;
-        var validRanges = new List<(long, long)>();
-        for (int i = 0; i < hailstones.Count; i++)
+
+        // finding possible speed values only returns a single value for each direction so no need to check combinations
+        var dx = PossibleValues(hailstones.Select(h => (h.Px, h.Dx)))[0];
+        var dy = PossibleValues(hailstones.Select(h => (h.Py, h.Dy)))[0];
+        var dz = PossibleValues(hailstones.Select(h => (h.Pz, h.Dz)))[0];
+
+        var (xMin, xMax) = FindMinMax(dx, hailstones.Select(h => (h.Px, h.Dx)));
+        var (yMin, yMax) = FindMinMax(dy, hailstones.Select(h => (h.Py, h.Dy)));
+        var (zMin, zMax) = FindMinMax(dz, hailstones.Select(h => (h.Pz, h.Dz)));
+
+        var zStart = zMax;
+        var hailstone = hailstones[0];
+        // z min and max are equal in my input so collision time for all hailstones is known and xy start can simply be calculated
+        var dt = (zStart - hailstone.Pz) / (hailstone.Dz - dz);
+        var xStart = hailstone.Px + (hailstone.Dx - dx) * dt;
+        var yStart = hailstone.Py + (hailstone.Dy - dy) * dt;
+        return (long)(xStart + yStart + zStart);
+    }
+
+    private static (decimal, decimal) FindMinMax(decimal delta, IEnumerable<(decimal P, decimal V)> hailstones)
+    {
+        var min = decimal.MinValue;
+        var max = decimal.MaxValue;
+        foreach (var (P, V) in hailstones)
         {
-            for (int j = i + 1; j < hailstones.Count; j++)
+            if (V - delta >= 1) min = decimal.Max(P, min);
+            else if (V - delta <= -1) max = decimal.Min(P, max);
+            else
             {
-                if (hailstones[i].Dx == hailstones[j].Dx)
+                min = decimal.Max(P, min);
+                max = decimal.Min(P, max);
+            }
+        }
+        return (min, max);
+    }
+
+    private static List<decimal> PossibleValues(IEnumerable<(decimal P, decimal V)> hailstones)
+    {
+        var parallels = new Dictionary<decimal, List<(decimal P, decimal V)>>();
+        foreach (var hailstone in hailstones)
+        {
+            if (!parallels.ContainsKey(hailstone.V)) parallels[hailstone.V] = [];
+            parallels[hailstone.V].Add(hailstone);
+        }
+
+        var possibleVs = new List<List<decimal>>();
+        foreach (var group in parallels.Where(x => x.Value.Count == 3))
+        {
+            var possibleV = new List<decimal>();
+            var ordered = group.Value.OrderByDescending(x => x.P).ToList();
+            var dp1 = ordered[0].P - ordered[1].P;
+            var dp2 = ordered[1].P - ordered[2].P;
+            var dx = group.Key;
+            var ratio = BigInteger.GreatestCommonDivisor((BigInteger)dp1, (BigInteger)dp2);
+            var dt1Inc = dp1 / (decimal)ratio;
+            for (decimal dt1 = dt1Inc; dt1 <= dp1; dt1 += dt1Inc)
+            {
+                if (dp1 % dt1 == 0)
                 {
-                    var dx = (long)hailstones[j].Dx;
-                    long dp = (long)Math.Abs(hailstones[i].Px - hailstones[j].Px);
-                    validRanges.Add((dp, dx));
-                    lowlim = long.Max(lowlim, -dp + dx);
-                    uplim = long.Min(uplim, dp + dx);
+                    possibleV.Add(dp1 / dt1 + dx);
+                    possibleV.Add(-dp1 / dt1 + dx);
                 }
             }
+            possibleVs.Add(possibleV);
         }
-        validRanges = validRanges.OrderBy(x => x.Item2).ToList();
-
-        foreach (var range in validRanges[0..1])
+        var realllypossible = possibleVs[0];
+        foreach (var item in possibleVs.Skip(1))
         {
-            for (long i = range.Item2 + range.Item1; i >= range.Item2 - range.Item1; i += range.Item2)
-            {
-                var a = 1;
-                // Console.Write(i + ", ");
-            }
-            // Console.WriteLine();
+            realllypossible = realllypossible.Intersect(item).ToList();
         }
-        var combinedRange = validRanges[0];
-        for (int i = 1; i < validRanges.Count; i++)
-        {
-
-        }
-
-        return 0;
+        return realllypossible;
     }
 
     private class Hailstone
