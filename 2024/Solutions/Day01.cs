@@ -27,7 +27,7 @@ class Day01 : BaseDay
         var list2 = new List<int>();
         foreach (var line in lines)
         {
-            var numbers = line.Split("   ").Select(int.Parse);
+            var numbers = line.Split().Select(int.Parse);
             list1.Add(numbers.First());
             list2.Add(numbers.Last());
         }
