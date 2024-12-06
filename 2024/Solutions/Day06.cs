@@ -1,6 +1,3 @@
-
-using System.Formats.Asn1;
-
 namespace AoC2024;
 
 class Day06 : BaseDay
@@ -27,7 +24,13 @@ class Day06 : BaseDay
             }
         }
         var dir = (-1, 0);
-        var visited = new HashSet<(int, int)>() { pos };
+        var visited = GetVisited(pos, dir, obstacles, lines);
+        return visited.Select(x => x.Item1).Distinct().Count();
+    }
+
+    private static List<((int, int), (int, int))> GetVisited((int, int) pos, (int, int) dir, HashSet<(int, int)> obstacles, List<string> lines)
+    {
+        var visited = new List<((int, int), (int, int))>() { (pos, dir) };
         while (true)
         {
             var newPos = (pos.Item1 + dir.Item1, pos.Item2 + dir.Item2);
@@ -40,9 +43,9 @@ class Day06 : BaseDay
                 pos = newPos;
             }
             if (!Inbounds(pos, lines)) break;
-            visited.Add(pos);
+            visited.Add((pos, dir));
         }
-        return visited.Count;
+        return visited;
     }
 
     private static bool Inbounds((int, int) pos, List<string> lines)
@@ -71,35 +74,39 @@ class Day06 : BaseDay
                 }
             }
         }
+        var visited = GetVisited(startPos, (-1, 0), obstacles, lines);
+        var checkedPositions = new HashSet<(int, int)> { startPos };
         var answer = 0;
-        for (int i = 0; i < lines.Count; i++)
+        var alreadyVisited = new HashSet<((int, int), (int, int))>();
+        for (int i = 1; i < visited.Count; i++)
         {
-            for (int j = 0; j < lines[0].Length; j++)
+            var newObstacle = visited[i].Item1;
+            var startPosDir = visited[i - 1]; ;
+            alreadyVisited.Add(startPosDir);
+            if (!checkedPositions.Contains(newObstacle) && CreatesLoop(obstacles, newObstacle, lines, alreadyVisited, startPosDir))
             {
-                if (lines[i][j] == '.')
-                {
-                    var newObstacles = new HashSet<(int, int)>(obstacles)
-                    {
-                        (i, j)
-                    };
-                    if (CreatesLoop(startPos, newObstacles, lines))
-                    {
-                        answer++;
-                    }
-                }
+                answer++;
             }
+            checkedPositions.Add(newObstacle);
         }
         return answer;
     }
 
-    private static bool CreatesLoop((int, int) startPos, HashSet<(int, int)> obstacles, List<string> lines)
+    private static bool CreatesLoop(HashSet<(int, int)> obstacles, (int, int) newObstacle, List<string> lines, HashSet<((int, int), (int, int))> visitedHashSet, ((int, int), (int, int)) value)
     {
-        var dir = (-1, 0);
-        var visited = new HashSet<((int, int), (int, int))>() { (startPos, dir) };
+        var dir = value.Item2;
+        var startPos = value.Item1;
+        var visited = new HashSet<((int, int), (int, int))>(visitedHashSet);
+        var newObstacles = new HashSet<(int, int)>(obstacles)
+        {
+            newObstacle
+        };
+        var iter = 0;
         while (true)
         {
+            iter++;
             var newPos = (startPos.Item1 + dir.Item1, startPos.Item2 + dir.Item2);
-            if (obstacles.Contains(newPos))
+            if (newObstacles.Contains(newPos))
             {
                 dir = (dir.Item2, -dir.Item1);
             }
@@ -108,7 +115,10 @@ class Day06 : BaseDay
                 startPos = newPos;
             }
             if (!Inbounds(startPos, lines)) return false;
-            if (visited.Contains((startPos, dir))) return true;
+            if (visited.Contains((startPos, dir)))
+            {
+                return true;
+            }
             visited.Add((startPos, dir));
         }
     }
