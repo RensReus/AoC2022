@@ -11,30 +11,21 @@ class Day09 : BaseDay
         var memory = BuildMemory(line);
         var i = 0;
         var endI = memory.Count - 1;
-        var ans = 0L;
-        while (i <= endI)
+        while (true)
         {
             if (memory[i] == -1)
             {
-                while (memory[endI] == -1)
-                {
-                    endI--;
-                }
-                if (i > endI)
-                {
-                    break;
-                }
-                ans += memory[endI] * i;
+                while (memory[endI] == -1) endI--;
+                if (i > endI) break;
+
+                memory[i] = memory[endI];
+                memory[endI] = -1;
                 endI--;
-            }
-            else
-            {
-                ans += memory[i] * i;
             }
             i++;
         }
 
-        return ans;
+        return memory.Select((x, i) => x * i).Where(x => x > 0).Sum();
     }
 
     private static List<long> BuildMemory(string line)
@@ -84,41 +75,30 @@ class Day09 : BaseDay
                 if (i < 0) break;
             }
 
-            // find a block of -1 that is big enough
             for (var j = 0; j < i + 1; j++)
             {
-                if (memory[j] == -1)
+                var openSize = 0;
+                while (memory[j] == -1)
                 {
-                    var openSize = 0;
-                    while (memory[j] == -1)
-                    {
-                        j++;
-                        openSize++;
-                    }
+                    j++;
+                    openSize++;
+                }
 
-                    if (openSize >= size)
+                if (openSize >= size)
+                {
+                    for (int k = j - openSize; k < j - openSize + size; k++)
                     {
-                        for (int k = j - openSize; k < j - openSize + size; k++)
-                        {
-                            memory[k] = id;
-                        }
-                        for (int k = i + 1; k < i + 1 + size; k++)
-                        {
-                            memory[k] = -1;
-                        }
-                        break;
+                        memory[k] = id;
                     }
+                    for (int k = i + 1; k < i + 1 + size; k++)
+                    {
+                        memory[k] = -1;
+                    }
+                    break;
                 }
             }
         }
 
-        var ans = 0L;
-        for (int j = 0; j < memory.Count; j++)
-        {
-            if (memory[j] == -1) continue;
-            ans += memory[j] * j;
-
-        }
-        return ans;
+        return memory.Select((x, i) => x * i).Where(x => x > 0).Sum();
     }
 }
