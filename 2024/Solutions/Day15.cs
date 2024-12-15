@@ -1,4 +1,3 @@
-
 namespace AoC2024;
 
 class Day15 : BaseDay
@@ -11,6 +10,7 @@ class Day15 : BaseDay
         var lines = ReadLinesDouble(input);
         var maze = BuildMaze(lines[0]);
         var moves = string.Join("", lines[1]);
+
         var botPos = maze.First(x => x.Value == '@').Key;
         maze[botPos] = '.';
 
@@ -22,10 +22,8 @@ class Day15 : BaseDay
             {
                 nextPos = (nextPos.Item1 + dX, nextPos.Item2 + dY);
             }
-            if (maze[nextPos] is '#')
-            {
-                continue;
-            }
+            if (maze[nextPos] is '#') continue;
+
             botPos = (botPos.X + dX, botPos.Y + dY);
             if (maze[botPos] is 'O')
             {
@@ -67,71 +65,52 @@ class Day15 : BaseDay
     [Puzzle(expected: 1468005)]
     public static int Part2(string input)
     {
-        var lines = input.Split("\n\n");
-        var upsized = lines[0].Replace(".", "..").Replace("#", "##").Replace("O", "[]").Replace("@", "@.");
-        var maze = BuildMaze(upsized.Split("\n").ToList());
-        var moves = string.Join("", lines[1].Split("\n"));
+        var upsized = input.Replace(".", "..").Replace("#", "##").Replace("O", "[]").Replace("@", "@.");
+        var lines = ReadLinesDouble(upsized);
+        var maze = BuildMaze(lines[0]);
+        var moves = string.Join("", lines[1]);
+
         var botPos = maze.First(x => x.Value == '@').Key;
         maze[botPos] = '.';
-        var prevMaze = maze.ToString();
+
         foreach (var move in moves)
         {
             var (dX, dY) = GetDelta(move);
-            var toEval = new List<(int X, int Y)> { (botPos.X + dX, botPos.Y + dY) };
+            var toEval = new HashSet<(int X, int Y)> { (botPos.X + dX, botPos.Y + dY) };
             if (dY != 0)
             {
-                if (maze[(botPos.X, botPos.Y + dY)] is '[')
-                {
-                    toEval.Add((botPos.X + 1, botPos.Y + dY));
-                }
-                if (maze[(botPos.X, botPos.Y + dY)] is ']')
-                {
-                    toEval.Add((botPos.X - 1, botPos.Y + dY));
-                }
+                if (maze[(botPos.X, botPos.Y + dY)] is '[') toEval.Add((botPos.X + 1, botPos.Y + dY));
+                if (maze[(botPos.X, botPos.Y + dY)] is ']') toEval.Add((botPos.X - 1, botPos.Y + dY));
             }
-            var boxesToMove = new HashSet<(int X, int Y)>();
-            while (toEval.Any(nextPos => maze[nextPos] is '[' or ']') && !toEval.Any(nextPos => maze[nextPos] is '#'))
-            {
-                if (dY == 0)
-                {
-                    boxesToMove.Add(toEval[0]);
-                    toEval[0] = (toEval[0].X + dX, toEval[0].Y);
-                }
-                else
-                {
-                    var nextToEval = new List<(int X, int Y)>();
-                    foreach (var item in toEval.Where(nextPos => maze[nextPos] is '[' or ']'))
-                    {
-                        boxesToMove.Add(item);
-                        var toAdd = new List<(int X, int Y)> { (item.X, item.Y + dY) };
-                        if (maze[(item.X, item.Y + dY)] is '[')
-                        {
-                            toAdd.Add((item.X + 1, item.Y + dY));
-                        }
-                        if (maze[(item.X, item.Y + dY)] is ']')
-                        {
-                            toAdd.Add((item.X - 1, item.Y + dY));
-                        }
-                        foreach (var item2 in toAdd)
-                        {
-                            if (!nextToEval.Contains(item2)) nextToEval.Add(item2);
-                        }
-                    }
-                    toEval = nextToEval;
-                }
-            }
-            if (toEval.Any(nextPos => maze[nextPos] is '#'))
-            {
-                continue;
-            }
-            botPos = (botPos.X + dX, botPos.Y + dY);
 
+            var boxesToMove = new HashSet<(int X, int Y)>();
+            while (toEval.Any(pos => maze[pos] is '[' or ']'))
+            {
+                var nextToEval = new HashSet<(int X, int Y)>();
+                foreach (var item in toEval.Where(pos => maze[pos] is '[' or ']'))
+                {
+                    boxesToMove.Add(item);
+                    var next = (item.X + dX, item.Y + dY);
+                    nextToEval.Add(next);
+                    if (dY != 0)
+                    {
+                        if (maze[next] is '[') nextToEval.Add((item.X + 1, item.Y + dY));
+                        if (maze[next] is ']') nextToEval.Add((item.X - 1, item.Y + dY));
+                    }
+                }
+
+                toEval = nextToEval;
+                if (toEval.Any(pos => maze[pos] is '#')) break;
+            }
+
+            if (toEval.Any(nextPos => maze[nextPos] is '#')) continue;
+
+            botPos = (botPos.X + dX, botPos.Y + dY);
             foreach (var box in boxesToMove.Reverse())
             {
                 maze[(box.X + dX, box.Y + dY)] = maze[(box.X, box.Y)];
                 maze[box] = '.';
             }
-            prevMaze = maze.ToString();
         }
 
         return maze.Where(x => x.Value == '[').Sum(x => x.Key.X + x.Key.Y * 100);
