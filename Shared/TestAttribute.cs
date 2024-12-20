@@ -52,7 +52,14 @@ public abstract class TestAttribute : Attribute, ITestBuilder, IImplyFixture
         var year = declaringType.Namespace![3..];
 
         var path = Path.Combine(Directory.GetCurrentDirectory(), $"{year}/Inputs/{filename}.txt");
-        return File.ReadAllText(path).ReplaceLineEndings("\n").TrimEnd();
+        try
+        {
+            return File.ReadAllText(path).ReplaceLineEndings("\n").TrimEnd();
+        }
+        catch (FileNotFoundException)
+        {
+            return "";
+        }
     }
 
     protected virtual string TestName(IMethodInfo method, string input)
