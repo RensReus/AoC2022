@@ -1,4 +1,3 @@
-
 namespace AoC2024;
 
 class Day22 : BaseDay
@@ -6,15 +5,12 @@ class Day22 : BaseDay
     [Example(expected: 37327623, input: "1\n10\n100\n2024")]
     [Puzzle(expected: 17965282217)]
     public static long Part1(string input)
-    {
-        var lines = ReadLines(input);
-        return lines.Sum(x => GenerateSecret(x, 2000));
-    }
+        => ReadLines(input).Sum(GenerateSecret);
 
-    private static long GenerateSecret(string line, long iter)
+    private static long GenerateSecret(string line)
     {
         var ans = long.Parse(line);
-        for (long i = 0; i < iter; i++)
+        for (long i = 0; i < 2000; i++)
         {
             ans = ApplySteps(ans);
         }
@@ -42,67 +38,47 @@ class Day22 : BaseDay
         return newAns % 16777216;
     }
 
-    private static long BitwiseXor(long v, long literal)
+    private static long BitwiseXor(long a, long b)
     {
-        return v ^ literal;
+        return a ^ b;
     }
 
     [Example(expected: 23, input: "1\n2\n3\n2024")]
     [Puzzle(expected: 2152)]
     public static long Part2(string input)
     {
-        var lines = ReadLines(input);
-        var changeSequences = lines.Select(GetSequences).ToList();
-        var allSequences = changeSequences.SelectMany(x => x.Keys).Distinct().OrderBy(x => x.Item1).ThenBy(x => x.Item2).ThenBy(x => x.Item3).ThenBy(x => x.Item4).ToList();
-        var ans = 0;
-        foreach (var sequence in allSequences)
+        var totals = new Dictionary<(int, int, int, int), int>();
+        foreach (var line in ReadLines(input))
         {
-            var total = changeSequences.Sum(x => x.TryGetValue(sequence, out var value) ? value : 0);
-            if (total > ans)
-            {
-                ans = total;
-            }
+            AddToTotals(totals, line);
         }
-        return ans;
+        return totals.Values.Max();
     }
 
-    private static Dictionary<(int, int, int, int), int> GetSequences(string line)
+    private static void AddToTotals(Dictionary<(int, int, int, int), int> totals, string line)
     {
+        var alreadyAdded = new HashSet<(int, int, int, int)>();
         var num = long.Parse(line);
         var prevPrice = num % 10;
-        var ans = new Dictionary<(int, int, int, int), int>();
-        var diffs = new Queue<int> { };
-        for (long i = 0; i < 4; i++)
+        var diffs = (-10, -10, -10, -10);
+        for (int i = 0; i < 2000; i++)
         {
-            num = ApplyMulStep(num, 64);
-            num = ApplyDivStep(num);
-            num = ApplyMulStep(num, 2048);
+            num = ApplySteps(num);
             var newPrice = num % 10;
-            diffs.Enqueue((int)(newPrice - prevPrice));
+            diffs = (diffs.Item2, diffs.Item3, diffs.Item4, (int)(newPrice - prevPrice));
+            TryAddToTotal(totals, diffs, newPrice, alreadyAdded);
             prevPrice = newPrice;
         }
-        ans.Add(ToTuple(diffs), (int)prevPrice);
-        for (long i = 4; i < 2000; i++)
-        {
-            num = ApplyMulStep(num, 64);
-            num = ApplyDivStep(num);
-            num = ApplyMulStep(num, 2048);
-
-            diffs.Dequeue();
-            var newPrice = num % 10;
-            diffs.Enqueue((int)(newPrice - prevPrice));
-            prevPrice = newPrice;
-            if (!ans.ContainsKey(ToTuple(diffs)))
-            {
-                ans.Add(ToTuple(diffs), (int)newPrice);
-            }
-        }
-        return ans;
     }
 
-    private static (int, int, int, int) ToTuple(Queue<int> diffs)
+    private static void TryAddToTotal(Dictionary<(int, int, int, int), int> totals, (int, int, int, int) diffs, long prevPrice, HashSet<(int, int, int, int)> alreadyAdded)
     {
-        var arr = diffs.ToArray();
-        return (arr[0], arr[1], arr[2], arr[3]);
+        if (alreadyAdded.Contains(diffs) || diffs.Item1 == -10) return;
+        if (!totals.ContainsKey(diffs))
+        {
+            totals[diffs] = 0;
+        }
+        totals[diffs] += (int)prevPrice;
+        alreadyAdded.Add(diffs);
     }
 }
