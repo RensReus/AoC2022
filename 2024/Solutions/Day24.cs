@@ -39,8 +39,7 @@ class Day24 : BaseDay
         return inputs;
     }
 
-    [Example(expected: "z00,z01,z02,z05", input: "x00: 0\nx01: 1\nx02: 0\nx03: 1\nx04: 0\nx05: 1\ny00: 0\ny01: 0\ny02: 1\ny03: 1\ny04: 0\ny05: 1\n\nx00 AND y00 -> z05\nx01 AND y01 -> z02\nx02 AND y02 -> z01\nx03 AND y03 -> z03\nx04 AND y04 -> z04\nx05 AND y05 -> z00")]
-    [Puzzle(expected: "1111111")]
+    [Puzzle(expected: "dck,fgn,nvh,qdg,vvf,z12,z19,z37")]
     public static string Part2(string input)
     {
         var lines = ReadLinesDouble(input);
@@ -48,22 +47,96 @@ class Day24 : BaseDay
         var instructions = lines[1].Select(x => x.Split(" ")).Select(x => (A: x[0], Op: x[1], B: x[2], Out: x[4])).ToList();
         var max = int.Parse(inputs.Keys.OrderByDescending(x => x).First()[1..]);
         var invalidOutputs = new HashSet<string>();
-        // x0 en y0 moeten een xor hebben die z0 oplevert
-        // x0 en y0 moeten een and hebben die een overflow oplevert
-        var overflow = "gct";
-
+        var prevOverflow = "gct"; // vervangen door check dat x0 xor y0 -> z0 en get prev overflow from x0 and y0 -> prevoverflow
+        var answer = new List<string>();
         for (int i = 1; i <= max; i++)
         {
             var x = $"x{i:D2}";
             var y = $"y{i:D2}";
             var z = $"z{i:D2}";
-            // er moet een XOR zijn tussen x en y die de single digit geeft
-            // er moet een AND zijn tussen x en y die een ioverflow oplevert
-            // dan moet z een xor van singledigit en overflow zijn
-            // en overflow moet een or zijn van ioverflow en overflow
-            // maak het pad tussen x,y overflow en z
+            var xyOr = instructions.Single(instr => instr.Op == "XOR" && ((instr.A == x && instr.B == y) || (instr.A == y && instr.B == x))).Out;
+            var zInstr = instructions.Single(instr => instr.Out == z);
+
+            var zInstrHasXyOr = zInstr.A == xyOr || zInstr.B == xyOr;
+            var zInstrHasPrevOverflow = zInstr.A == prevOverflow || zInstr.B == prevOverflow;
+            if ((zInstrHasPrevOverflow == false && zInstrHasXyOr == false) || zInstr.Op != "XOR") // z staat op verkeerde plek
+            {
+                var replacements = instructions.Where(instr => instr.Op == "XOR" && ((instr.A == xyOr && instr.B == prevOverflow) || (instr.A == prevOverflow && instr.B == xyOr)));
+                if (replacements.Count() == 1)
+                {
+                    var toSwap = replacements.Single().Out;
+                    Swap(instructions, toSwap, z);
+                    answer.Add(z);
+                    answer.Add(toSwap);
+                }
+                else
+                {
+                    throw new Exception("beide moeten verwisseld worden moeilijk enzo");
+                }
+            }
+            if (!zInstrHasXyOr && zInstrHasPrevOverflow)
+            {
+                var toSwap = zInstr.A == prevOverflow ? zInstr.B : zInstr.A;
+                Swap(instructions, toSwap, xyOr);
+                answer.Add(toSwap);
+                answer.Add(xyOr);
+                xyOr = toSwap;
+            }
+
+            if (!zInstrHasPrevOverflow && zInstrHasXyOr)
+            {
+                var toSwap = zInstr.A == xyOr ? zInstr.B : zInstr.A;
+                Swap(instructions, toSwap, xyOr);
+                answer.Add(toSwap);
+                answer.Add(prevOverflow);
+                prevOverflow = toSwap;
+            }
+
+            var iOverflow = instructions.Single(instr => instr.Op == "AND" && ((instr.A == prevOverflow && instr.B == xyOr) || (instr.A == xyOr && instr.B == prevOverflow))).Out;
+
+            var xyAnd = instructions.Single(instr => instr.Op == "AND" && ((instr.A == x && instr.B == y) || (instr.A == y && instr.B == x))).Out;
+            if (instructions.Any(instr => instr.Op == "OR" && ((instr.A == xyAnd && instr.B == prevOverflow) || (instr.A == prevOverflow && instr.B == xyAnd))))
+            {
+                prevOverflow = instructions.Single(instr => instr.Op == "OR" && ((instr.A == xyAnd && instr.B == prevOverflow) || (instr.A == prevOverflow && instr.B == xyAnd))).Out;
+                continue;
+            }
+
+            var possibleNewOverflow = instructions.Single(instr => instr.Op == "OR" && (instr.A == iOverflow || instr.B == xyAnd || instr.A == xyAnd || instr.B == iOverflow));
+            var hasXyAnd = possibleNewOverflow.A == xyAnd || possibleNewOverflow.B == xyAnd;
+            var hasIoverflow = possibleNewOverflow.A == iOverflow || possibleNewOverflow.B == iOverflow;
+
+            if (!hasXyAnd)
+            {
+                var toSwap = zInstr.A == iOverflow ? zInstr.B : zInstr.A;
+                Swap(instructions, toSwap, xyAnd);
+                answer.Add(toSwap);
+                answer.Add(xyAnd);
+            }
+
+            if (!hasIoverflow)
+            {
+                var toSwap = zInstr.A == xyAnd ? zInstr.B : zInstr.A;
+                Swap(instructions, toSwap, iOverflow);
+                answer.Add(toSwap);
+                answer.Add(iOverflow);
+            }
+            prevOverflow = possibleNewOverflow.Out;
         }
 
-        return "max";
+        return string.Join(",", answer.Order());
+    }
+
+    private static void Swap(List<(string A, string Op, string B, string Out)> instructions, string first, string second)
+    {
+        var firstInstr = instructions.Single(x => x.Out == first);
+        var index = instructions.IndexOf(firstInstr);
+        var secondInstr = instructions.Single(x => x.Out == second);
+        var index2 = instructions.IndexOf(secondInstr);
+
+        firstInstr.Out = second;
+        instructions[index] = firstInstr;
+
+        secondInstr.Out = first;
+        instructions[index2] = secondInstr;
     }
 }
