@@ -99,6 +99,6 @@ class Day04 : BaseDay
         var diag1 = new string([letters[row][col], letters[row + 1][col + 1], letters[row + 2][col + 2]]);
         var diag2 = new string([letters[row + 2][col], letters[row + 1][col + 1], letters[row][col + 2]]);
 
-        return (diag1 == "MAS" || diag1 == "SAM") && (diag2 == "MAS" || diag2 == "SAM");
+        return (diag1 is "MAS" or "SAM") && (diag2 is "MAS" or "SAM");
     }
 }
