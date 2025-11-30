@@ -8,7 +8,10 @@ namespace AoC.Shared;
 public class PuzzleAttribute : TestAttribute
 {
     public PuzzleAttribute(object expected, bool part2 = false) : base(expected, "Puzzle")
-        => Filename = part2 ? "_2" : "";
+    {
+        FilenameSuffix = part2 ? "_2" : "";
+        Folder = "Puzzle Inputs";
+    }
 }
 
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
@@ -18,13 +21,17 @@ public class ExampleAttribute : TestAttribute
         => Input = input;
 
     public ExampleAttribute(object expected, int input) : base(expected, $"Example {input}")
-        => Filename = $"_Example_{input}";
+    {
+        FilenameSuffix = $"_{input}";
+        Folder = "Example Inputs";
+    }
 }
 
 public abstract class TestAttribute : Attribute, ITestBuilder, IImplyFixture
 {
     internal string? Input;
-    internal string? Filename;
+    internal string? FilenameSuffix;
+    internal string? Folder;
     internal string NamePrefix;
     internal object Expected;
 
@@ -48,10 +55,10 @@ public abstract class TestAttribute : Attribute, ITestBuilder, IImplyFixture
 
     private string ReadInput(Type declaringType)
     {
-        var filename = declaringType.ToString()[8..] + Filename;
+        var filename = declaringType.ToString()[8..] + FilenameSuffix;
         var year = declaringType.Namespace![3..];
 
-        var path = Path.Combine(Directory.GetCurrentDirectory(), $"{year}/Inputs/{filename}.txt");
+        var path = Path.Combine(Directory.GetCurrentDirectory(), $"{year}/{Folder}/{filename}.txt");
         try
         {
             return File.ReadAllText(path).ReplaceLineEndings("\n").TrimEnd();

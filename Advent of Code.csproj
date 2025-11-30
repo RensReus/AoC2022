@@ -14,7 +14,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="*\Inputs\**">
+    <Content Include="*\Puzzle Inputs\**">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="*\Example Inputs\**">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
