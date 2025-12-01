@@ -2,7 +2,7 @@ namespace AoC2022;
 
 class Day12 : BaseDay
 {
-    [Example(expected: 31, input: "Sabqponm;abcryxxl;accszExk;acctuvwj;abdefghi")]
+    [Example(expected: 31, input: "Sabqponm\nabcryxxl\naccszExk\nacctuvwj\nabdefghi")]
     [Puzzle(expected: 468)]
     public int Part1(string input)
     {
@@ -15,21 +15,20 @@ class Day12 : BaseDay
     {
         var visited = new HashSet<Point>();
         var steps = 0;
-        var height = heightMap.Count();
-        var width = heightMap[0].Count();
+        var height = heightMap.Count;
+        var width = heightMap[0].Length;
         var nextPoints = new List<Point>();
-        var currPoints = new List<Point>();
         var target = goingDown ? 'a' : 'E';
         nextPoints.Add(start);
         visited.Add(start);
         while (true)
         {
             steps++;
-            currPoints = nextPoints.ToList();
-            nextPoints = new List<Point>();
+            var currPoints = nextPoints.ToList();
+            nextPoints = [];
             foreach (var point in currPoints)
             {
-                foreach (var neighbour in point.Neighbours(heightMap, height, width, goingDown))
+                foreach (var neighbour in point.ValidNeighbours(heightMap, height, width, goingDown))
                 {
                     if (!visited.Contains(neighbour))
                     {
@@ -50,9 +49,9 @@ class Day12 : BaseDay
 
     private Point GetPoint(char v, IList<string> heightMap)
     {
-        for (int row = 0; row < heightMap.Count(); row++)
+        for (int row = 0; row < heightMap.Count; row++)
         {
-            for (int col = 0; col < heightMap[0].Count(); col++)
+            for (int col = 0; col < heightMap[0].Length; col++)
             {
                 if (heightMap[row][col] == v) return new(row, col, 'a');
             }
@@ -60,16 +59,14 @@ class Day12 : BaseDay
         return new(-1, -1, '0');
     }
 
-    [Example(expected: 29, input: "Sabqponm;abcryxxl;accszExk;acctuvwj;abdefghi")]
+    [Example(expected: 29, input: "Sabqponm\nabcryxxl\naccszExk\nacctuvwj\nabdefghi")]
     [Puzzle(expected: 459)]
     public int Part2(string input)
     {
         var heightMap = ReadLines(input);
-        var start = GetPoint('S', heightMap);
-        heightMap[start.Row].Replace('S', 'a');
-        var end = GetPoint('E', heightMap);
-        end.Elevation = 'z';
-        return RouteLength(heightMap, end, true);
+        var start = GetPoint('E', heightMap);
+        start.Elevation = 'z';
+        return RouteLength(heightMap, start, true);
     }
 }
 
@@ -90,7 +87,7 @@ public class Point
     public override int GetHashCode()
         => HashCode.Combine(Row, Col);
 
-    internal IEnumerable<Point> Neighbours(IList<string> heightMap, int height, int width, bool goingDown)
+    internal IEnumerable<Point> ValidNeighbours(IList<string> heightMap, int height, int width, bool goingDown)
     {
         var neighbours = new List<Point>();
         if (Row - 1 >= 0) neighbours.Add(new(Row - 1, Col, heightMap[Row - 1][Col]));
