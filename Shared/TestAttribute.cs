@@ -61,7 +61,7 @@ public abstract class TestAttribute : Attribute, ITestBuilder, IImplyFixture
         var path = Path.Combine(Directory.GetCurrentDirectory(), $"{year}/{Folder}/{filename}.txt");
         try
         {
-            return File.ReadAllText(path).ReplaceLineEndings("\n").TrimEnd();
+            return File.ReadAllText(path).ReplaceLineEndings("\n");
         }
         catch (FileNotFoundException)
         {
