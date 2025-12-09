@@ -1,4 +1,3 @@
-
 namespace AoC2025;
 
 class Day08 : BaseDay
